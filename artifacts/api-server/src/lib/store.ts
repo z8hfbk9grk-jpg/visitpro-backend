@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 export interface Reservation {
   id: string;
   nom: string;
@@ -17,6 +19,7 @@ export interface Agent {
   email: string;
   telephone: string;
   agence: string;
+  passwordHash: string;
   createdAt: string;
 }
 
@@ -73,4 +76,13 @@ export function generateToken(): string {
   return Array.from(bytes)
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
+}
+
+export function hashPassword(password: string): string {
+  return createHash("sha256").update(password).digest("hex");
+}
+
+export function safeAgent(agent: Agent): Omit<Agent, "passwordHash"> {
+  const { passwordHash: _omit, ...rest } = agent;
+  return rest;
 }

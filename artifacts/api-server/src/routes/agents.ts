@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { z } from "zod";
-import { agents, tokens, nextId, generateToken } from "../lib/store";
+import { agents, tokens, nextId, generateToken, hashPassword, safeAgent } from "../lib/store";
 
 const router: IRouter = Router();
 
@@ -10,6 +10,7 @@ const AgentSchema = z.object({
   email: z.string().email("Email invalide"),
   telephone: z.string().min(8, "Numéro de téléphone invalide"),
   agence: z.string().min(1, "Le nom de l'agence est requis"),
+  motDePasse: z.string().min(6, "Le mot de passe doit faire au moins 6 caractères"),
 });
 
 router.post("/agents", (req, res) => {
@@ -29,9 +30,12 @@ router.post("/agents", (req, res) => {
     return;
   }
 
-  const agent = {
+  const { motDePasse, ...donnees } = result.data;
+
+  const agent: import("../lib/store").Agent = {
     id: nextId("agent"),
-    ...result.data,
+    ...donnees,
+    passwordHash: hashPassword(motDePasse),
     createdAt: new Date().toISOString(),
   };
 
@@ -41,7 +45,7 @@ router.post("/agents", (req, res) => {
 
   req.log.info({ agentId: agent.id }, "Nouvel agent créé");
 
-  res.status(201).json({ agent, token });
+  res.status(201).json({ agent: safeAgent(agent), token });
 });
 
 export default router;
