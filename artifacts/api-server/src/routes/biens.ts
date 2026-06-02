@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { db, biensTable, agentsTable } from "@workspace/db";
 import { requireAuth, type AuthRequest } from "../lib/auth";
 
@@ -16,6 +16,8 @@ const BienSchema = z.object({
   surface: z.number().positive("La surface doit être positive"),
   description: z.string().optional().default(""),
 });
+
+const BienUpdateSchema = BienSchema.partial();
 
 router.post("/biens", requireAuth, async (req: AuthRequest, res) => {
   const result = BienSchema.safeParse(req.body);
@@ -60,6 +62,52 @@ router.get("/biens", async (req, res) => {
     .where(eq(biensTable.agentId, agentId));
 
   res.json({ agentId, total: data.length, data });
+});
+
+router.put("/biens/:id", requireAuth, async (req: AuthRequest, res) => {
+  const { id } = req.params;
+  const result = BienUpdateSchema.safeParse(req.body);
+
+  if (!result.success) {
+    res.status(400).json({ error: "Données invalides", details: result.error.issues });
+    return;
+  }
+
+  if (Object.keys(result.data).length === 0) {
+    res.status(400).json({ error: "Aucun champ à mettre à jour" });
+    return;
+  }
+
+  const [bien] = await db
+    .update(biensTable)
+    .set(result.data)
+    .where(and(eq(biensTable.id, id), eq(biensTable.agentId, req.agentId!)))
+    .returning();
+
+  if (!bien) {
+    res.status(404).json({ error: "Bien introuvable ou accès non autorisé" });
+    return;
+  }
+
+  req.log.info({ bienId: id }, "Bien mis à jour");
+  res.json(bien);
+});
+
+router.delete("/biens/:id", requireAuth, async (req: AuthRequest, res) => {
+  const { id } = req.params;
+
+  const [supprime] = await db
+    .delete(biensTable)
+    .where(and(eq(biensTable.id, id), eq(biensTable.agentId, req.agentId!)))
+    .returning();
+
+  if (!supprime) {
+    res.status(404).json({ error: "Bien introuvable ou accès non autorisé" });
+    return;
+  }
+
+  req.log.info({ bienId: id }, "Bien supprimé");
+  res.json({ message: "Bien supprimé", bien: supprime });
 });
 
 export default router;
