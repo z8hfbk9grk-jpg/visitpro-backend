@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { z } from "zod";
-import { eq, and } from "drizzle-orm";
+import { eq, and, SQL } from "drizzle-orm";
 import { db, biensTable, agentsTable } from "@workspace/db";
 import { requireAuth, type AuthRequest } from "../lib/auth";
 
@@ -54,8 +54,10 @@ router.get("/biens/:id", async (req, res) => {
   res.json(bien);
 });
 
+const TYPES_VALIDES = ["appartement", "maison", "studio", "bureau", "terrain"] as const;
+
 router.get("/biens", async (req, res) => {
-  const { agentId } = req.query;
+  const { agentId, type } = req.query;
 
   if (agentId && typeof agentId === "string") {
     const [agent] = await db
@@ -68,18 +70,32 @@ router.get("/biens", async (req, res) => {
       res.status(404).json({ error: "Agent introuvable" });
       return;
     }
+  }
 
-    const data = await db
-      .select()
-      .from(biensTable)
-      .where(eq(biensTable.agentId, agentId));
-
-    res.json({ agentId, total: data.length, data });
+  if (type && typeof type === "string" && !TYPES_VALIDES.includes(type as (typeof TYPES_VALIDES)[number])) {
+    res.status(400).json({
+      error: `Type invalide. Valeurs acceptées : ${TYPES_VALIDES.join(", ")}`,
+    });
     return;
   }
 
-  const data = await db.select().from(biensTable);
-  res.json({ total: data.length, data });
+  const conditions: SQL[] = [];
+  if (agentId && typeof agentId === "string") conditions.push(eq(biensTable.agentId, agentId));
+  if (type && typeof type === "string") conditions.push(eq(biensTable.type, type));
+
+  const data = await db
+    .select()
+    .from(biensTable)
+    .where(conditions.length > 0 ? and(...conditions) : undefined);
+
+  res.json({
+    total: data.length,
+    filtres: {
+      agentId: (agentId as string) ?? null,
+      type: (type as string) ?? null,
+    },
+    data,
+  });
 });
 
 router.put("/biens/:id", requireAuth, async (req: AuthRequest, res) => {
