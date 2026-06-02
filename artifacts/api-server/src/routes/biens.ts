@@ -57,28 +57,29 @@ router.get("/biens/:id", async (req, res) => {
 router.get("/biens", async (req, res) => {
   const { agentId } = req.query;
 
-  if (!agentId || typeof agentId !== "string") {
-    res.status(400).json({ error: "Le paramètre agentId est requis" });
+  if (agentId && typeof agentId === "string") {
+    const [agent] = await db
+      .select({ id: agentsTable.id })
+      .from(agentsTable)
+      .where(eq(agentsTable.id, agentId))
+      .limit(1);
+
+    if (!agent) {
+      res.status(404).json({ error: "Agent introuvable" });
+      return;
+    }
+
+    const data = await db
+      .select()
+      .from(biensTable)
+      .where(eq(biensTable.agentId, agentId));
+
+    res.json({ agentId, total: data.length, data });
     return;
   }
 
-  const [agent] = await db
-    .select({ id: agentsTable.id })
-    .from(agentsTable)
-    .where(eq(agentsTable.id, agentId))
-    .limit(1);
-
-  if (!agent) {
-    res.status(404).json({ error: "Agent introuvable" });
-    return;
-  }
-
-  const data = await db
-    .select()
-    .from(biensTable)
-    .where(eq(biensTable.agentId, agentId));
-
-  res.json({ agentId, total: data.length, data });
+  const data = await db.select().from(biensTable);
+  res.json({ total: data.length, data });
 });
 
 router.put("/biens/:id", requireAuth, async (req: AuthRequest, res) => {
