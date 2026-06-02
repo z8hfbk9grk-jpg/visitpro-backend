@@ -44,4 +44,19 @@ router.get("/reservations", (_req, res) => {
   });
 });
 
+router.delete("/reservations/:id", (req, res) => {
+  const { id } = req.params;
+  const index = reservations.findIndex((r) => r.id === id);
+
+  if (index === -1) {
+    res.status(404).json({ error: "Réservation introuvable" });
+    return;
+  }
+
+  const [supprimee] = reservations.splice(index, 1);
+  req.log.info({ reservationId: id }, "Réservation annulée");
+
+  res.json({ message: "Réservation annulée", reservation: supprimee });
+});
+
 export default router;
