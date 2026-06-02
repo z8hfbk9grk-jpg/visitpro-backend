@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { z } from "zod";
 import { reservations, nextId } from "../lib/store";
+import { requireAuth } from "../lib/auth";
 
 const router: IRouter = Router();
 
@@ -37,14 +38,14 @@ router.post("/reservations", (req, res) => {
   res.status(201).json(reservation);
 });
 
-router.get("/reservations", (_req, res) => {
+router.get("/reservations", requireAuth, (_req, res) => {
   res.json({
     total: reservations.length,
     data: reservations,
   });
 });
 
-router.delete("/reservations/:id", (req, res) => {
+router.delete("/reservations/:id", requireAuth, (req, res) => {
   const { id } = req.params;
   const index = reservations.findIndex((r) => r.id === id);
 

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { z } from "zod";
-import { agents, nextId } from "../lib/store";
+import { agents, tokens, nextId, generateToken } from "../lib/store";
 
 const router: IRouter = Router();
 
@@ -35,10 +35,13 @@ router.post("/agents", (req, res) => {
     createdAt: new Date().toISOString(),
   };
 
+  const token = generateToken();
   agents.push(agent);
+  tokens.set(token, agent.id);
+
   req.log.info({ agentId: agent.id }, "Nouvel agent créé");
 
-  res.status(201).json(agent);
+  res.status(201).json({ agent, token });
 });
 
 export default router;

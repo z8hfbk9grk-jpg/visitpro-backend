@@ -59,7 +59,18 @@ export const biens: Bien[] = [
   },
 ];
 
+// token → agentId
+export const tokens = new Map<string, string>();
+
 let counter = 1000;
 export function nextId(prefix: string): string {
   return `${prefix}-${++counter}`;
+}
+
+export function generateToken(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }

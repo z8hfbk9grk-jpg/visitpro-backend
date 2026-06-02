@@ -1,11 +1,11 @@
 import { Router, type IRouter } from "express";
 import { z } from "zod";
 import { biens, agents, nextId } from "../lib/store";
+import { requireAuth, type AuthRequest } from "../lib/auth";
 
 const router: IRouter = Router();
 
 const BienSchema = z.object({
-  agentId: z.string().min(1, "L'agentId est requis"),
   titre: z.string().min(1, "Le titre est requis"),
   adresse: z.string().min(1, "L'adresse est requise"),
   type: z.enum(["appartement", "maison", "studio", "bureau", "terrain"], {
@@ -18,7 +18,7 @@ const BienSchema = z.object({
   description: z.string().optional().default(""),
 });
 
-router.post("/biens", (req, res) => {
+router.post("/biens", requireAuth, (req: AuthRequest, res) => {
   const result = BienSchema.safeParse(req.body);
 
   if (!result.success) {
@@ -29,14 +29,9 @@ router.post("/biens", (req, res) => {
     return;
   }
 
-  const agentExiste = agents.find((a) => a.id === result.data.agentId);
-  if (!agentExiste) {
-    res.status(404).json({ error: "Agent introuvable" });
-    return;
-  }
-
   const bien = {
     id: nextId("bien"),
+    agentId: req.agentId!,
     ...result.data,
     createdAt: new Date().toISOString(),
   };
@@ -52,6 +47,12 @@ router.get("/biens", (req, res) => {
 
   if (!agentId || typeof agentId !== "string") {
     res.status(400).json({ error: "Le paramètre agentId est requis" });
+    return;
+  }
+
+  const agentExiste = agents.find((a) => a.id === agentId);
+  if (!agentExiste) {
+    res.status(404).json({ error: "Agent introuvable" });
     return;
   }
 
