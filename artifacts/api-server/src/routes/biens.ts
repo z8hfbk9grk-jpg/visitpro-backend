@@ -37,6 +37,23 @@ router.post("/biens", requireAuth, async (req: AuthRequest, res) => {
   res.status(201).json(bien);
 });
 
+router.get("/biens/:id", async (req, res) => {
+  const { id } = req.params;
+
+  const [bien] = await db
+    .select()
+    .from(biensTable)
+    .where(eq(biensTable.id, id))
+    .limit(1);
+
+  if (!bien) {
+    res.status(404).json({ error: "Bien introuvable" });
+    return;
+  }
+
+  res.json(bien);
+});
+
 router.get("/biens", async (req, res) => {
   const { agentId } = req.query;
 
