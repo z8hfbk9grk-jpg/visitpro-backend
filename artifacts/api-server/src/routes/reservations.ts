@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { z } from "zod";
-import { reservations, nextId } from "../lib/store";
+import { eq } from "drizzle-orm";
+import { db, reservationsTable } from "@workspace/db";
 import { requireAuth } from "../lib/auth";
 
 const router: IRouter = Router();
@@ -15,56 +16,49 @@ const ReservationSchema = z.object({
   heure: z.string().min(1, "L'heure est requise"),
 });
 
-router.post("/reservations", (req, res) => {
+router.post("/reservations", async (req, res) => {
   const result = ReservationSchema.safeParse(req.body);
 
   if (!result.success) {
-    res.status(400).json({
-      error: "Données invalides",
-      details: result.error.issues,
-    });
+    res.status(400).json({ error: "Données invalides", details: result.error.issues });
     return;
   }
 
-  const reservation = {
-    id: nextId("res"),
-    ...result.data,
-    createdAt: new Date().toISOString(),
-  };
+  const id = crypto.randomUUID();
+  const [reservation] = await db
+    .insert(reservationsTable)
+    .values({ id, ...result.data })
+    .returning();
 
-  reservations.push(reservation);
-  req.log.info({ reservationId: reservation.id }, "Nouvelle réservation créée");
-
+  req.log.info({ reservationId: id }, "Nouvelle réservation créée");
   res.status(201).json(reservation);
 });
 
-router.get("/reservations", requireAuth, (req, res) => {
+router.get("/reservations", requireAuth, async (req, res) => {
   const { bienId } = req.query;
 
   const data =
     bienId && typeof bienId === "string"
-      ? reservations.filter((r) => r.bien === bienId)
-      : reservations;
+      ? await db.select().from(reservationsTable).where(eq(reservationsTable.bien, bienId))
+      : await db.select().from(reservationsTable);
 
-  res.json({
-    total: data.length,
-    filtre: bienId ?? null,
-    data,
-  });
+  res.json({ total: data.length, filtre: bienId ?? null, data });
 });
 
-router.delete("/reservations/:id", requireAuth, (req, res) => {
+router.delete("/reservations/:id", requireAuth, async (req, res) => {
   const { id } = req.params;
-  const index = reservations.findIndex((r) => r.id === id);
 
-  if (index === -1) {
+  const [supprimee] = await db
+    .delete(reservationsTable)
+    .where(eq(reservationsTable.id, id))
+    .returning();
+
+  if (!supprimee) {
     res.status(404).json({ error: "Réservation introuvable" });
     return;
   }
 
-  const [supprimee] = reservations.splice(index, 1);
   req.log.info({ reservationId: id }, "Réservation annulée");
-
   res.json({ message: "Réservation annulée", reservation: supprimee });
 });
 
