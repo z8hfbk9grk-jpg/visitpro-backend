@@ -38,10 +38,18 @@ router.post("/reservations", (req, res) => {
   res.status(201).json(reservation);
 });
 
-router.get("/reservations", requireAuth, (_req, res) => {
+router.get("/reservations", requireAuth, (req, res) => {
+  const { bienId } = req.query;
+
+  const data =
+    bienId && typeof bienId === "string"
+      ? reservations.filter((r) => r.bien === bienId)
+      : reservations;
+
   res.json({
-    total: reservations.length,
-    data: reservations,
+    total: data.length,
+    filtre: bienId ?? null,
+    data,
   });
 });
 
