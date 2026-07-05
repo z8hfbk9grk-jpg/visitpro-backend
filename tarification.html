@@ -733,16 +733,15 @@ body {
 
     <div class="auth-field">
       <label>Email</label>
-      <input type="email" id="login-email" placeholder="sophie.renaud@agence.fr">
+      <input type="email" placeholder="sophie.renaud@agence.fr">
     </div>
     <div class="auth-field">
       <label>Mot de passe</label>
-      <input type="password" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="password" placeholder="••••••••">
     </div>
     <div class="auth-forgot">Mot de passe oublié ?</div>
-    <div id="login-error" style="display:none;background:rgba(224,90,90,0.1);border:1px solid rgba(224,90,90,0.3);border-radius:7px;padding:10px 14px;font-size:0.82rem;color:#E05A5A;margin-bottom:12px;"></div>
 
-    <button class="btn btn-gold btn-lg" id="login-btn" onclick="doLogin()">Se connecter →</button>
+    <button class="btn btn-gold btn-lg" onclick="showSuccess('connexion')">Se connecter →</button>
 
     <div class="auth-divider">ou</div>
 
@@ -782,28 +781,27 @@ body {
     <div class="auth-row">
       <div class="auth-field">
         <label>Prénom</label>
-        <input type="text" id="reg-prenom" placeholder="Sophie">
+        <input type="text" placeholder="Sophie">
       </div>
       <div class="auth-field">
         <label>Nom</label>
-        <input type="text" id="reg-nom" placeholder="Renaud">
+        <input type="text" placeholder="Renaud">
       </div>
     </div>
     <div class="auth-field">
       <label>Email professionnel</label>
-      <input type="email" id="reg-email" placeholder="sophie.renaud@agence.fr">
+      <input type="email" placeholder="sophie.renaud@agence.fr">
     </div>
     <div class="auth-field">
       <label>Nom de l'agence</label>
-      <input type="text" id="reg-agence" placeholder="Martineau Immobilier">
+      <input type="text" placeholder="Martineau Immobilier">
     </div>
     <div class="auth-field">
       <label>Mot de passe</label>
-      <input type="password" id="reg-password" placeholder="8 caractères minimum">
+      <input type="password" placeholder="8 caractères minimum">
     </div>
-    <div id="reg-error" style="display:none;background:rgba(224,90,90,0.1);border:1px solid rgba(224,90,90,0.3);border-radius:7px;padding:10px 14px;font-size:0.82rem;color:#E05A5A;margin-bottom:12px;"></div>
 
-    <button class="btn btn-gold btn-lg" id="reg-btn" onclick="doInscription()">Démarrer mon essai gratuit →</button>
+    <button class="btn btn-gold btn-lg" onclick="showSuccess('inscription')">Démarrer mon essai gratuit →</button>
 
     <div class="auth-terms">
       En créant un compte vous acceptez nos <a href="#">CGU</a> et notre <a href="#">Politique de confidentialité</a>
@@ -875,8 +873,8 @@ function toggleBilling() {
 
 function updatePrices() {
   Object.entries(prices).forEach(([plan, monthly]) => {
-    const annual = Math.round(monthly * 12 * 0.85);
     const monthly_annual = Math.round(monthly * 0.85);
+    const annual = monthly_annual * 12;
     document.getElementById('price-'+plan).textContent = isAnnual ? monthly_annual : monthly;
     const annualEl = document.getElementById('annual-'+plan);
     annualEl.innerHTML = isAnnual
@@ -886,8 +884,6 @@ function updatePrices() {
 }
 
 // PLAN SELECTION
-const API = 'https://visitpro-backend-2.onrender.com';
-
 function selectPlan(name, price) {
   selectPlanOption(document.getElementById('opt-'+name.toLowerCase()), name);
   scrollToAuth('register');
@@ -911,90 +907,23 @@ function toggleFaq(item) {
   item.classList.toggle('open');
 }
 
-// ── LOGIN RÉEL ───────────────────────────────────────────
-async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-  const btn = document.getElementById('login-btn');
-  const errDiv = document.getElementById('login-error');
-
-  if(!email || !password) {
-    errDiv.style.display = 'block';
-    errDiv.textContent = 'Veuillez remplir tous les champs.';
-    return;
+// MODAL SUCCÈS
+function showSuccess(type) {
+  const modal = document.getElementById('success-modal');
+  const icon = document.getElementById('modal-icon');
+  const title = document.getElementById('modal-title');
+  const text = document.getElementById('modal-text');
+  if(type === 'connexion') {
+    icon.textContent = '👋';
+    title.textContent = 'Bon retour !';
+    text.textContent = 'Connexion réussie. Vous allez être redirigé vers votre tableau de bord.';
+  } else {
+    icon.textContent = '🎉';
+    title.textContent = 'Bienvenue sur VisitPro !';
+    text.textContent = 'Votre essai gratuit de 21 jours commence maintenant. Ajoutez votre premier bien en moins de 5 minutes.';
   }
-
-  errDiv.style.display = 'none';
-  btn.disabled = true;
-  btn.textContent = 'Connexion...';
-
-  try {
-    const res = await fetch(`${API}/api/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, motDePasse: password })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Email ou mot de passe incorrect.');
-
-    localStorage.setItem('visitpro_token', data.token);
-    localStorage.setItem('visitpro_agent', JSON.stringify(data.agent));
-    window.location = 'backoffice.html';
-  } catch(e) {
-    errDiv.style.display = 'block';
-    errDiv.textContent = e.message;
-    btn.disabled = false;
-    btn.textContent = 'Se connecter →';
-  }
+  modal.classList.add('open');
 }
-
-// ── INSCRIPTION RÉELLE ───────────────────────────────────
-async function doInscription() {
-  const prenom = document.getElementById('reg-prenom').value.trim();
-  const nom = document.getElementById('reg-nom').value.trim();
-  const email = document.getElementById('reg-email').value.trim();
-  const agence = document.getElementById('reg-agence').value.trim();
-  const password = document.getElementById('reg-password').value;
-  const btn = document.getElementById('reg-btn');
-  const errDiv = document.getElementById('reg-error');
-  const planEl = document.querySelector('.plan-option.selected');
-  const plan = planEl ? planEl.dataset.plan : 'Pro';
-
-  if(!prenom || !nom || !email || !password) {
-    errDiv.style.display = 'block';
-    errDiv.textContent = 'Veuillez remplir tous les champs obligatoires.';
-    return;
-  }
-  if(password.length < 8) {
-    errDiv.style.display = 'block';
-    errDiv.textContent = 'Le mot de passe doit contenir au moins 8 caractères.';
-    return;
-  }
-
-  errDiv.style.display = 'none';
-  btn.disabled = true;
-  btn.textContent = 'Création en cours...';
-
-  try {
-    const res = await fetch(`${API}/api/agents`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nom, prenom, email, agence: agence || 'Mon Agence', motDePasse: password, telephone: '' })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Erreur lors de la création du compte.');
-
-    localStorage.setItem('visitpro_token', data.token);
-    localStorage.setItem('visitpro_agent', JSON.stringify(data.agent));
-    window.location = 'backoffice.html';
-  } catch(e) {
-    errDiv.style.display = 'block';
-    errDiv.textContent = e.message;
-    btn.disabled = false;
-    btn.textContent = 'Démarrer mon essai gratuit →';
-  }
-}
-
 function closeModal() {
   document.getElementById('success-modal').classList.remove('open');
 }
