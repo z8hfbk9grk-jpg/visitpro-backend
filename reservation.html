@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Réserver une visite</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F7F4EF;
+    --charcoal: #1C1C1E;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --muted: #8A8480;
+    --white: #FFFFFF;
+    --border: #E5E0D8;
+    --success: #3D7A5E;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--charcoal);
+    min-height: 100vh;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    background: var(--charcoal);
+    padding: 14px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .topbar-logo {
+    font-family: 'Playfair Display', serif;
+    color: var(--gold);
+    font-size: 1.2rem;
+    letter-spacing: 0.05em;
+  }
+  .topbar-agent {
+    color: #aaa;
+    font-size: 0.82rem;
+    font-weight: 300;
+  }
+
+  /* MAIN LAYOUT */
+  .page {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: calc(100vh - 52px);
+  }
+
+  /* LEFT - BIEN */
+  .bien-panel {
+    position: relative;
+    overflow: hidden;
+  }
+  .bien-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .bien-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(28,28,30,0.85) 0%, rgba(28,28,30,0.1) 60%);
+  }
+  .bien-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 40px;
+  }
+  .bien-tag {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--charcoal);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 2px;
+    margin-bottom: 14px;
+  }
+  .bien-titre {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--white);
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .bien-adresse {
+    color: var(--gold-light);
+    font-size: 0.9rem;
+    font-weight: 300;
+    margin-bottom: 24px;
+  }
+  .bien-stats {
+    display: flex;
+    gap: 24px;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--white);
+  }
+  .stat-label {
+    font-size: 0.72rem;
+    color: var(--gold-light);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 300;
+  }
+  .stat-divider {
+    width: 1px;
+    background: rgba(255,255,255,0.2);
+  }
+
+  /* RIGHT - FORMULAIRE */
+  .form-panel {
+    padding: 50px 48px;
+    background: var(--white);
+    overflow-y: auto;
+  }
+  .form-header {
+    margin-bottom: 36px;
+  }
+  .form-eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .form-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--charcoal);
+    line-height: 1.3;
+  }
+  .form-subtitle {
+    margin-top: 8px;
+    font-size: 0.88rem;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* STEPS */
+  .steps {
+    display: flex;
+    gap: 0;
+    margin-bottom: 36px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    cursor: pointer;
+  }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    transition: all 0.3s;
+    flex-shrink: 0;
+  }
+  .step-label {
+    font-size: 0.82rem;
+    color: var(--muted);
+    font-weight: 400;
+    transition: color 0.3s;
+  }
+  .step.active .step-num {
+    background: var(--charcoal);
+    border-color: var(--charcoal);
+    color: var(--white);
+  }
+  .step.active .step-label { color: var(--charcoal); font-weight: 500; }
+  .step.done .step-num {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--white);
+  }
+  .step-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    margin: 0 8px;
+    align-self: center;
+  }
+
+  /* SECTION */
+  .section { display: none; }
+  .section.visible { display: block; }
+
+  /* CALENDAR */
+  .calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .cal-month {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+  }
+  .cal-nav {
+    background: none;
+    border: 1px solid var(--border);
+    width: 32px; height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--charcoal);
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .cal-nav:hover { background: var(--charcoal); color: var(--white); border-color: var(--charcoal); }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 24px;
+  }
+  .cal-day-name {
+    text-align: center;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 6px 0;
+  }
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1.5px solid transparent;
+    font-weight: 400;
+  }
+  .cal-day:hover:not(.empty):not(.past) { background: var(--cream); }
+  .cal-day.available { color: var(--charcoal); }
+  .cal-day.available:hover { border-color: var(--gold); }
+  .cal-day.selected { background: var(--charcoal); color: var(--white); border-color: var(--charcoal); font-weight: 500; }
+  .cal-day.past { color: #ccc; cursor: default; }
+  .cal-day.empty { cursor: default; }
+  .cal-day.has-slot::after {
+    content: '';
+    display: block;
+    width: 4px; height: 4px;
+    background: var(--gold);
+    border-radius: 50%;
+    position: absolute;
+    bottom: 4px;
+  }
+  .cal-day { position: relative; }
+
+  /* CRÉNEAUX */
+  .creneaux-title {
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .creneaux-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+  .creneau {
+    padding: 10px 8px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    text-align: center;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 400;
+    color: var(--charcoal);
+  }
+  .creneau:hover { border-color: var(--gold); background: #FDFAF4; }
+  .creneau.selected { background: var(--charcoal); color: var(--white); border-color: var(--charcoal); font-weight: 500; }
+  .creneau.full { color: #ccc; cursor: default; text-decoration: line-through; border-color: var(--border); }
+
+  /* FORM FIELDS */
+  .field { margin-bottom: 20px; }
+  .field label {
+    display: block;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .field input, .field select {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--charcoal);
+    background: var(--white);
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .field input:focus, .field select:focus { border-color: var(--charcoal); }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .check-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 28px;
+  }
+  .check-row input[type=checkbox] { width: 16px; height: 16px; margin-top: 3px; accent-color: var(--charcoal); flex-shrink: 0; }
+  .check-row span { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+  /* BUTTONS */
+  .btn-primary {
+    width: 100%;
+    padding: 16px;
+    background: var(--charcoal);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary:hover { background: #2d2d2f; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(28,28,30,0.2); }
+  .btn-secondary {
+    background: none;
+    border: 1.5px solid var(--border);
+    color: var(--charcoal);
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 16px;
+  }
+  .btn-secondary:hover { border-color: var(--charcoal); }
+
+  /* RECAP */
+  .recap-box {
+    background: var(--cream);
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+  .recap-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .recap-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .recap-icon { font-size: 1rem; margin-top: 1px; flex-shrink: 0; }
+  .recap-text strong { display: block; font-size: 0.9rem; font-weight: 500; }
+  .recap-text span { font-size: 0.82rem; color: var(--muted); }
+
+  /* SUCCESS */
+  .success-state {
+    text-align: center;
+    padding: 20px 0;
+  }
+  .success-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--success);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    font-size: 1.8rem;
+  }
+  .success-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+  .success-text {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 340px;
+    margin: 0 auto 28px;
+  }
+  .success-badges {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--cream);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: var(--charcoal);
+  }
+
+  .cal-day.available {
+    color: var(--charcoal);
+    cursor: pointer;
+  }
+  .cal-day.available:hover {
+    border-color: var(--gold);
+    background: #FDFAF4;
+  }
+  .cal-day.today {
+    border-color: var(--charcoal) !important;
+    font-weight: 700;
+  }
+  .cal-day.selected {
+    background: var(--charcoal);
+    color: white;
+    border-color: var(--charcoal);
+    font-weight: 600;
+  }
+
+  /* VALIDATION */
+  .field-error {
+    display: none;
+    font-size: 0.76rem;
+    color: #C0392B;
+    margin-top: 5px;
+    padding-left: 2px;
+  }
+  .field-error.visible { display: block; }
+  .field input.error,
+  .field select.error {
+    border-color: #F5C6C6 !important;
+    background: #FFF8F8;
+  }
+  .field input.error:focus,
+  .field select.error:focus {
+    border-color: #C0392B !important;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .page { grid-template-columns: 1fr; }
+    .bien-panel { height: 280px; }
+    .form-panel { padding: 32px 24px; }
+    .field-row { grid-template-columns: 1fr; }
+    .topbar { padding: 14px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">VisitPro</div>
+  <div class="topbar-agent">Agence Martineau Immobilier · Sophie Renaud</div>
+</div>
+
+<div class="page">
+
+  <!-- PANNEAU GAUCHE : LE BIEN -->
+  <div class="bien-panel">
+    <img class="bien-img" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&q=80" alt="Bien immobilier">
+    <div class="bien-overlay"></div>
+    <div class="bien-info">
+      <div class="bien-tag">Appartement</div>
+      <div class="bien-titre">Appartement Haussmannien<br>4 pièces lumineux</div>
+      <div class="bien-adresse">📍 18 Rue du Faubourg Saint-Antoine, Paris 11e</div>
+      <div class="bien-stats">
+        <div class="stat">
+          <div class="stat-val">87 m²</div>
+          <div class="stat-label">Surface</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <div class="stat-val">4</div>
+          <div class="stat-label">Pièces</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <div class="stat-val">2</div>
+          <div class="stat-label">Chambres</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <div class="stat-val">645 000 €</div>
+          <div class="stat-label">Prix</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANNEAU DROIT : FORMULAIRE -->
+  <div class="form-panel">
+    <div class="form-header">
+      <div class="form-eyebrow">Réservation de visite</div>
+      <div class="form-title">Choisissez votre créneau</div>
+      <div class="form-subtitle">Réservez directement en ligne, confirmation immédiate par SMS et email.</div>
+      <div id="sync-badge" style="display:none;align-items:center;gap:6px;margin-top:10px;font-size:0.74rem;color:#3D7A5E;background:#EDF7F2;padding:6px 12px;border-radius:20px;border:1px solid rgba(61,122,94,0.2);width:fit-content;"></div>
+    </div>
+
+    <!-- ÉTAPES -->
+    <div class="steps">
+      <div class="step active" id="step1-tab">
+        <div class="step-num">1</div>
+        <div class="step-label">Date & heure</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" id="step2-tab">
+        <div class="step-num">2</div>
+        <div class="step-label">Vos infos</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" id="step3-tab">
+        <div class="step-num">3</div>
+        <div class="step-label">Confirmation</div>
+      </div>
+    </div>
+
+    <!-- ÉTAPE 1 : DATE -->
+    <div class="section visible" id="section1">
+      <div class="calendar-header">
+        <div class="cal-month" id="cal-month-title">Juin 2025</div>
+        <div style="display:flex;gap:6px;">
+          <button class="cal-nav" onclick="changeResaMonth(-1)">‹</button>
+          <button class="cal-nav" onclick="changeResaMonth(1)">›</button>
+        </div>
+      </div>
+
+      <div class="cal-grid">
+        <div class="cal-day-name">L</div>
+        <div class="cal-day-name">M</div>
+        <div class="cal-day-name">M</div>
+        <div class="cal-day-name">J</div>
+        <div class="cal-day-name">V</div>
+        <div class="cal-day-name">S</div>
+        <div class="cal-day-name">D</div>
+        <div id="cal-days-resa" style="display:contents;"></div>
+      </div>
+
+      <!-- Message sélection -->
+      <div id="resa-no-day" style="background:var(--cream);border-radius:8px;padding:14px 16px;margin-bottom:20px;font-size:0.88rem;color:var(--muted);display:flex;align-items:center;gap:8px;">
+        📅 <span>Sélectionnez un jour disponible pour voir les créneaux</span>
+      </div>
+
+      <!-- Créneaux -->
+      <div id="resa-creneaux-section" style="display:none;">
+        <div class="creneaux-title">Créneaux disponibles · <span id="resa-day-label" style="color:var(--charcoal)"></span></div>
+        <div class="creneaux-grid" id="resa-creneaux-grid"></div>
+      </div>
+
+      <button class="btn-primary" id="btn-continuer" style="display:none;" onclick="goStep(2)">Continuer →</button>
+    </div>
+
+    <!-- ÉTAPE 2 : INFOS CLIENT -->
+    <div class="section" id="section2">
+      <button class="btn-secondary" onclick="goStep(1)">← Retour</button>
+
+      <!-- Message erreur global -->
+      <div id="form-error" style="display:none;background:#FFF0F0;border:1px solid #F5C6C6;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:0.84rem;color:#C0392B;display:none;align-items:center;gap:8px;">
+        ⚠️ <span id="form-error-msg">Veuillez remplir tous les champs obligatoires.</span>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Prénom <span style="color:#C0392B;">*</span></label>
+          <input type="text" id="f-prenom" placeholder="Marie" oninput="clearError('f-prenom')">
+          <div class="field-error" id="err-prenom">Prénom requis</div>
+        </div>
+        <div class="field">
+          <label>Nom <span style="color:#C0392B;">*</span></label>
+          <input type="text" id="f-nom" placeholder="Dupont" oninput="clearError('f-nom')">
+          <div class="field-error" id="err-nom">Nom requis</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Email <span style="color:#C0392B;">*</span></label>
+        <input type="email" id="f-email" placeholder="marie.dupont@email.com" oninput="clearError('f-email')">
+        <div class="field-error" id="err-email">Email invalide ou manquant</div>
+      </div>
+
+      <div class="field">
+        <label>Téléphone <span style="color:#C0392B;">*</span></label>
+        <input type="tel" id="f-tel" placeholder="06 12 34 56 78" oninput="clearError('f-tel')">
+        <div class="field-error" id="err-tel">Numéro de téléphone requis (pour recevoir les SMS)</div>
+      </div>
+
+      <div class="field">
+        <label>Situation <span style="color:#C0392B;">*</span></label>
+        <select id="f-situation" onchange="clearError('f-situation')">
+          <option value="">Votre profil acheteur</option>
+          <option>Primo-accédant</option>
+          <option>Investisseur</option>
+          <option>Déjà propriétaire</option>
+          <option>À la recherche depuis moins de 3 mois</option>
+          <option>À la recherche depuis plus de 3 mois</option>
+        </select>
+        <div class="field-error" id="err-situation">Veuillez sélectionner votre profil</div>
+      </div>
+
+      <div class="check-row">
+        <input type="checkbox" id="rgpd">
+        <label for="rgpd"><span>J'accepte que mes coordonnées soient transmises à l'agent immobilier dans le cadre de cette visite. Aucun démarchage commercial. <span style="color:#C0392B;">*</span></span></label>
+      </div>
+      <div class="field-error" id="err-rgpd" style="margin-top:-8px;margin-bottom:12px;">Vous devez accepter pour continuer</div>
+
+      <div style="font-size:0.76rem;color:var(--muted);margin-bottom:16px;">
+        <span style="color:#C0392B;">*</span> Champs obligatoires
+      </div>
+
+      <button class="btn-primary" onclick="validerFormulaire()">Confirmer la visite →</button>
+    </div>
+
+    <!-- ÉTAPE 3 : CONFIRMATION -->
+    <div class="section" id="section3">
+      <div class="success-state">
+        <div class="success-icon">✓</div>
+        <div class="success-title">Visite confirmée !</div>
+        <div class="success-text">Votre rendez-vous a bien été enregistré. Vous allez recevoir une confirmation par email et SMS dans les prochaines minutes.</div>
+        <div class="success-badges">
+          <div class="badge">📧 Email envoyé</div>
+          <div class="badge">📱 SMS envoyé</div>
+          <div class="badge">📅 Agenda mis à jour</div>
+        </div>
+      </div>
+
+      <div class="recap-box">
+        <div class="recap-label">Récapitulatif</div>
+        <div class="recap-row">
+          <div class="recap-icon">🏠</div>
+          <div class="recap-text">
+            <strong>Appartement Haussmannien 4P · 87m²</strong>
+            <span>18 Rue du Faubourg Saint-Antoine, Paris 11e</span>
+          </div>
+        </div>
+        <div class="recap-row">
+          <div class="recap-icon">📅</div>
+          <div class="recap-text">
+            <strong>Lundi 3 juillet 2025 à 15h30</strong>
+            <span>Durée estimée : 30 minutes</span>
+          </div>
+        </div>
+        <div class="recap-row">
+          <div class="recap-icon">👤</div>
+          <div class="recap-text">
+            <strong>Sophie Renaud</strong>
+            <span>Agence Martineau Immobilier</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:0.82rem;color:var(--muted);text-align:center;line-height:1.6;">
+        Un SMS de rappel vous sera envoyé la veille de votre visite.<br>
+        Pour annuler ou modifier : <a href="#" style="color:var(--charcoal);">cliquez ici</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ── VALIDATION FORMULAIRE ────────────────────
+  async function validerFormulaire() {
+    let valid = true;
+
+    // Réinitialiser toutes les erreurs
+    ['prenom','nom','email','tel','situation','rgpd'].forEach(f => clearError('f-'+f));
+    document.getElementById('form-error').style.display = 'none';
+
+    // Prénom
+    const prenom = document.getElementById('f-prenom').value.trim();
+    if(!prenom) { showError('f-prenom', 'err-prenom'); valid = false; }
+
+    // Nom
+    const nom = document.getElementById('f-nom').value.trim();
+    if(!nom) { showError('f-nom', 'err-nom'); valid = false; }
+
+    // Email
+    const email = document.getElementById('f-email').value.trim();
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if(!email || !emailOk) { showError('f-email', 'err-email'); valid = false; }
+
+    // Téléphone
+    const tel = document.getElementById('f-tel').value.trim().replace(/\s/g,'');
+    const telOk = tel.length >= 10 && /^[0-9+]{10,14}$/.test(tel);
+    if(!tel || !telOk) { showError('f-tel', 'err-tel'); valid = false; }
+
+    // Situation
+    const situation = document.getElementById('f-situation').value;
+    if(!situation) { showError('f-situation', 'err-situation'); valid = false; }
+
+    // RGPD
+    if(!document.getElementById('rgpd').checked) {
+      document.getElementById('err-rgpd').classList.add('visible');
+      valid = false;
+    }
+
+    if(!valid) {
+      // Afficher le message d'erreur global
+      const errDiv = document.getElementById('form-error');
+      errDiv.style.display = 'flex';
+      // Scroll vers le haut du formulaire
+      errDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    // Tout est valide → passer à l'étape 3
+   // Envoyer la réservation à l'API
+  const API = 'https://visitpro-backend-2.onrender.com';
+  
+  try {
+    const response = await fetch(`${API}/api/reservations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nom: nom,
+        prenom: prenom,
+        email: email,
+        telephone: tel,
+        bien: 'Appartement Haussmannien 4P',
+        date: selectedCreneau ? selectedCreneau.dateLabel : '',
+        heure: selectedCreneau ? selectedCreneau.heure : ''
+      })
+    });
+    
+    if(response.ok) {
+      goStep(3);
+    } else {
+      const err = await response.json();
+      document.getElementById('form-error').style.display = 'flex';
+      document.getElementById('form-error-msg').textContent = err.error || 'Erreur lors de la réservation.';
+    }
+  } catch(e) {
+    goStep(3); // Continuer même si l'API est inaccessible
+  }
+  }
+
+  function showError(inputId, errorId) {
+    const input = document.getElementById(inputId);
+    if(input) input.classList.add('error');
+    const err = document.getElementById(errorId);
+    if(err) err.classList.add('visible');
+  }
+
+  function clearError(inputId) {
+    const input = document.getElementById(inputId);
+    if(input) input.classList.remove('error');
+    const errId = 'err-' + inputId.replace('f-','');
+    const err = document.getElementById(errId);
+    if(err) err.classList.remove('visible');
+    document.getElementById('form-error').style.display = 'none';
+  }
+
+  // ── SYNC AVEC BACK-OFFICE ────────────────────
+  // Lire les disponibilités sauvegardées depuis le back-office
+  function loadDispoFromBackoffice() {
+    try {
+      const raw = localStorage.getItem('visitpro_dispo');
+      if(raw) {
+        const data = JSON.parse(raw);
+        // Reconstruire les créneaux par jour depuis les horaires
+        const creneauxBase = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00'];
+        const dayMap = { lun:1, mar:2, mer:3, jeu:4, ven:5, sam:6, dim:0 };
+        data.horaires.forEach(h => {
+          const dayNum = dayMap[h.id];
+          if(h.on) {
+            const startH = parseInt(h.start);
+            const endH   = parseInt(h.end);
+            creneauxParJour[dayNum] = creneauxBase.filter(c => {
+              const [hh] = c.split(':').map(Number);
+              return hh >= startH && hh < endH;
+            });
+          } else {
+            creneauxParJour[dayNum] = [];
+          }
+        });
+        // Charger les jours bloqués
+        if(data.blocked) {
+          data.blocked.forEach(k => creneauxPris.add(k + '-blocked'));
+          window._blockedDays = new Set(data.blocked);
+        }
+        // Afficher indicateur de sync
+        const savedTime = new Date(data.savedAt).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+        document.getElementById('sync-badge').style.display = 'flex';
+        document.getElementById('sync-badge').innerHTML = '🔗 Synchronisé avec l\'agenda · ' + savedTime;
+        return true;
+      }
+    } catch(e) {}
+    return false;
+  }
+
+  // Lire les visites déjà prises depuis le back-office
+  function loadVisitesFromBackoffice() {
+    try {
+      const raw = localStorage.getItem('visitpro_visites');
+      if(raw) {
+        const data = JSON.parse(raw);
+        Object.entries(data).forEach(([key, visites]) => {
+          const parts = key.split('-'); // year-month-day
+          visites.forEach(v => {
+            creneauxPris.add(`${parts[0]}-${parts[1]}-${parts[2]}-${v.heure.replace('h',':').padEnd(5,'0')}`);
+          });
+        });
+      }
+    } catch(e) {}
+  }
+
+  // ── CALENDRIER DYNAMIQUE ─────────────────────
+  const MONTHS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+  const today = new Date();
+  let resaYear  = today.getFullYear();
+  let resaMonth = today.getMonth();
+  let selectedDate = null;
+  let selectedCreneau = null;
+
+  // Créneaux par défaut (remplacés si back-office synchronisé)
+  const creneauxParJour = {
+    1: ['09:00','10:30','11:30','14:00','15:00','15:30','17:00'],
+    2: ['09:00','10:30','11:30','14:00','15:00','15:30','17:00'],
+    3: ['09:00','10:30','11:30','14:00','15:00','15:30','17:00'],
+    4: ['09:00','10:30','11:30','14:00','15:00','15:30','17:00'],
+    5: ['09:00','10:30','14:00','15:00','15:30'],
+    6: ['09:00','10:30','11:30'],
+    0: [],
+  };
+
+  // Créneaux déjà pris
+  const creneauxPris = new Set();
+
+  // Charger depuis le back-office
+  loadDispoFromBackoffice();
+  loadVisitesFromBackoffice();
+
+  function renderResaCal() {
+    const title = document.getElementById('cal-month-title');
+    title.textContent = MONTHS_FR[resaMonth] + ' ' + resaYear;
+
+    const grid = document.getElementById('cal-days-resa');
+    grid.innerHTML = '';
+
+    const firstDay = new Date(resaYear, resaMonth, 1).getDay();
+    const offset   = firstDay === 0 ? 6 : firstDay - 1;
+    const daysInMonth = new Date(resaYear, resaMonth + 1, 0).getDate();
+    const todayFlat = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+    for(let i = 0; i < offset; i++) {
+      const el = document.createElement('div');
+      el.className = 'cal-day empty';
+      grid.appendChild(el);
+    }
+
+    for(let d = 1; d <= daysInMonth; d++) {
+      const date    = new Date(resaYear, resaMonth, d);
+      const dayOfWeek = date.getDay();
+      const isPast  = date < todayFlat;
+      const isToday = date.getTime() === todayFlat.getTime();
+      const isClosed = !creneauxParJour[dayOfWeek] || creneauxParJour[dayOfWeek].length === 0;
+      const dateKey = `${resaYear}-${resaMonth}-${d}`;
+      const isBlocked = window._blockedDays && window._blockedDays.has(dateKey);
+      const isSelected = selectedDate &&
+        selectedDate.getDate() === d &&
+        selectedDate.getMonth() === resaMonth &&
+        selectedDate.getFullYear() === resaYear;
+
+      const el = document.createElement('div');
+
+      if(isPast || isClosed || isBlocked) {
+        el.className = 'cal-day past';
+        el.textContent = d;
+        if(isBlocked && !isPast) el.title = 'Indisponible';
+      } else {
+        el.className = 'cal-day available' + (isSelected ? ' selected' : '') + (isToday ? ' today' : '');
+        el.textContent = d;
+        el.onclick = () => selectDay(new Date(resaYear, resaMonth, d));
+      }
+      grid.appendChild(el);
+    }
+  }
+
+  function selectDay(date) {
+    selectedDate = date;
+    selectedCreneau = null;
+    renderResaCal();
+    showCreneaux(date);
+  }
+
+  function showCreneaux(date) {
+    const dayOfWeek = date.getDay();
+    const creneaux  = creneauxParJour[dayOfWeek] || [];
+    const dayNames  = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+    const label     = `${dayNames[dayOfWeek]} ${date.getDate()} ${MONTHS_FR[date.getMonth()]}`;
+
+    document.getElementById('resa-no-day').style.display = 'none';
+    document.getElementById('resa-creneaux-section').style.display = 'block';
+    document.getElementById('resa-day-label').textContent = label;
+
+    const grid = document.getElementById('resa-creneaux-grid');
+    grid.innerHTML = '';
+
+    if(creneaux.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:0.84rem;padding:12px;">Aucun créneau disponible ce jour.</div>';
+      document.getElementById('btn-continuer').style.display = 'none';
+      return;
+    }
+
+    creneaux.forEach(h => {
+      const key  = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${h}`;
+      const isPris = creneauxPris.has(key);
+      const el   = document.createElement('div');
+      el.className = 'creneau' + (isPris ? ' full' : '');
+      el.textContent = h;
+      if(!isPris) {
+        el.onclick = () => selectCreneauFn(el, h, label);
+      }
+      grid.appendChild(el);
+    });
+
+    document.getElementById('btn-continuer').style.display = 'none';
+  }
+
+  function changeResaMonth(dir) {
+    resaMonth += dir;
+    if(resaMonth > 11) { resaMonth = 0; resaYear++; }
+    if(resaMonth < 0)  { resaMonth = 11; resaYear--; }
+    const now = new Date();
+    if(resaYear < now.getFullYear() || (resaYear === now.getFullYear() && resaMonth < now.getMonth())) {
+      resaMonth = now.getMonth();
+      resaYear  = now.getFullYear();
+    }
+    selectedDate = null;
+    selectedCreneau = null;
+    document.getElementById('resa-no-day').style.display = 'flex';
+    document.getElementById('resa-creneaux-section').style.display = 'none';
+    document.getElementById('btn-continuer').style.display = 'none';
+    renderResaCal();
+  }
+
+  function selectCreneauFn(el, heure, dateLabel) {
+    document.querySelectorAll('.creneau').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedCreneau = { heure, dateLabel };
+    document.getElementById('btn-continuer').style.display = 'block';
+  }
+
+  // ── STEPS ────────────────────────────────────
+  function goStep(n) {
+    if(n === 2 && !selectedCreneau) return;
+    [1,2,3].forEach(i => {
+      document.getElementById('section'+i).classList.remove('visible');
+      const tab = document.getElementById('step'+i+'-tab');
+      tab.classList.remove('active','done');
+    });
+    document.getElementById('section'+n).classList.add('visible');
+    for(let i=1;i<n;i++) document.getElementById('step'+i+'-tab').classList.add('done');
+    document.getElementById('step'+n+'-tab').classList.add('active');
+
+    // Mettre à jour le récap en étape 3
+    if(n === 3 && selectedCreneau) {
+      const lines = document.querySelectorAll('#section3 .recap-text');
+      if(lines[1]) {
+        lines[1].querySelector('strong').textContent = selectedCreneau.dateLabel + ' à ' + selectedCreneau.heure;
+      }
+      // Sauvegarder la réservation dans localStorage
+      try {
+        const reservations = JSON.parse(localStorage.getItem('visitpro_reservations') || '[]');
+        reservations.push({
+          bien: 'Appartement Haussmannien 4P',
+          date: selectedCreneau.dateLabel,
+          heure: selectedCreneau.heure,
+          createdAt: new Date().toISOString()
+        });
+        localStorage.setItem('visitpro_reservations', JSON.stringify(reservations));
+      } catch(e) {}
+    }
+  }
+
+  // Init
+  renderResaCal();
+</script>
+
+</body>
+</html>
