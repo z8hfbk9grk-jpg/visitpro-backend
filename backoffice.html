@@ -32,6 +32,87 @@ body {
   display: flex;
 }
 
+/* LOGIN SCREEN */
+#login-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#login-screen.hidden { display: none; }
+.login-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 48px 40px;
+  width: 420px;
+  max-width: 90vw;
+}
+.login-logo {
+  font-family: 'Fraunces', serif;
+  font-size: 1.8rem;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+.login-sub {
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 36px;
+}
+.login-field { margin-bottom: 16px; }
+.login-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: block;
+}
+.login-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 11px 14px;
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.login-input:focus { border-color: var(--gold); }
+.login-btn {
+  width: 100%;
+  background: var(--gold);
+  color: var(--bg);
+  border: none;
+  border-radius: 7px;
+  padding: 13px;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: opacity 0.15s;
+}
+.login-btn:hover { opacity: 0.9; }
+.login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.login-error {
+  background: rgba(224,90,90,0.1);
+  border: 1px solid rgba(224,90,90,0.3);
+  border-radius: 7px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: var(--red);
+  margin-bottom: 16px;
+  display: none;
+}
+
 /* SIDEBAR */
 .sidebar {
   width: 240px;
@@ -2199,10 +2280,10 @@ body {
   </div>
 
   <div class="sidebar-agent">
-    <div class="agent-avatar">SR</div>
+    <div class="agent-avatar" id="sidebar-avatar">--</div>
     <div>
-      <div class="agent-name">Sophie Renaud</div>
-      <div class="agent-agency">Martineau Immobilier</div>
+      <div class="agent-name" id="sidebar-name">Chargement...</div>
+      <div class="agent-agency" id="sidebar-agency"></div>
     </div>
   </div>
 
@@ -2240,10 +2321,33 @@ body {
   <div class="sidebar-bottom">
     <div class="plan-badge" id="sidebar-plan-badge">⏳ Essai gratuit</div>
     <div id="sidebar-plan-info">3 biens · 30 SMS · 14 jours restants</div>
+    <div style="margin-top:12px;">
+      <button onclick="doLogout()" style="width:100%;background:none;border:1px solid rgba(224,90,90,0.3);color:var(--red);padding:8px;border-radius:7px;font-family:'Syne',sans-serif;font-size:0.76rem;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(224,90,90,0.08)'" onmouseout="this.style.background='none'">
+        ← Se déconnecter
+      </button>
+    </div>
   </div>
 </aside>
 
 <!-- MODAL BLOCAGE / UPGRADE -->
+<!-- ÉCRAN LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">VisitPro</div>
+    <div class="login-sub">Accès back-office agent</div>
+    <div class="login-error" id="login-error">Email ou mot de passe incorrect.</div>
+    <div class="login-field">
+      <label class="login-label">Email</label>
+      <input class="login-input" type="email" id="login-email" placeholder="votre@email.fr" />
+    </div>
+    <div class="login-field">
+      <label class="login-label">Mot de passe</label>
+      <input class="login-input" type="password" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+    </div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Se connecter</button>
+  </div>
+</div>
+
 <div class="limit-modal-overlay" id="limit-modal-overlay" onclick="if(event.target===this)closeLimitModal()">
   <div class="limit-modal" onclick="event.stopPropagation()" style="width:520px;">
 
@@ -5848,6 +5952,211 @@ document.querySelectorAll('.bien-card').forEach(card => {
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG API ──────────────────────────────────────────────
+const API = 'https://visitpro-backend-2.onrender.com';
+const MOIS_FR = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
+
+function getToken() { return localStorage.getItem('visitpro_token'); }
+function getAgent() { try { return JSON.parse(localStorage.getItem('visitpro_agent')); } catch(e) { return null; } }
+
+// ── LOGOUT ─────────────────────────────────────────────────
+async function doLogout() {
+  const token = getToken();
+  if(token) {
+    try {
+      await fetch(`${API}/api/logout`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+    } catch(e) {}
+  }
+  localStorage.removeItem('visitpro_token');
+  localStorage.removeItem('visitpro_agent');
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-password').value = '';
+}
+
+// ── LOGIN ───────────────────────────────────────────────────
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errDiv = document.getElementById('login-error');
+  const btn = document.getElementById('login-btn');
+
+  errDiv.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Connexion...';
+
+  try {
+    const res = await fetch(`${API}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, motDePasse: password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erreur');
+
+    localStorage.setItem('visitpro_token', data.token);
+    localStorage.setItem('visitpro_agent', JSON.stringify(data.agent));
+    document.getElementById('login-screen').classList.add('hidden');
+    initDashboard(data.agent);
+  } catch(e) {
+    errDiv.style.display = 'block';
+    errDiv.textContent = e.message || 'Email ou mot de passe incorrect.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Se connecter';
+  }
+}
+
+// ── INIT DASHBOARD ──────────────────────────────────────────
+async function initDashboard(agent) {
+  // Sidebar
+  const initiales = ((agent.prenom?.[0] || '') + (agent.nom?.[0] || '')).toUpperCase();
+  document.getElementById('sidebar-avatar').textContent = initiales;
+  document.getElementById('sidebar-name').textContent = `${agent.prenom} ${agent.nom}`;
+  document.getElementById('sidebar-agency').textContent = agent.agence || '';
+
+  // Mettre à jour le titre du dashboard
+  const pageTitle = document.querySelector('#page-dashboard .page-title');
+  if(pageTitle) pageTitle.textContent = `Bonjour, ${agent.prenom} ✦`;
+
+  const token = getToken();
+  const headers = { 'Authorization': `Bearer ${token}` };
+
+  try {
+    const [reservRes, agentStatsRes] = await Promise.all([
+      fetch(`${API}/api/reservations?limite=50`, { headers }),
+      fetch(`${API}/api/agents/${agent.id}/stats`)
+    ]);
+
+    const reservData = await reservRes.json();
+    const agentStats = await agentStatsRes.json();
+
+    const reservations = reservData.data || [];
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const in7days = new Date(today); in7days.setDate(today.getDate() + 7);
+
+    const avenir = reservations.filter(r => r.date >= todayStr);
+    const semaine = reservations.filter(r => r.date >= todayStr && r.date <= in7days.toISOString().split('T')[0]);
+    const moisActuel = today.getMonth();
+    const cesMois = reservations.filter(r => new Date(r.date).getMonth() === moisActuel);
+
+    // Stats cards
+    const statCards = document.querySelectorAll('#page-dashboard .stat-card-val');
+    if(statCards[0]) statCards[0].textContent = cesMois.length;
+    if(statCards[1]) statCards[1].textContent = semaine.length;
+    if(statCards[2]) statCards[2].textContent = agentStats.stats?.nbBiens ?? '—';
+    if(statCards[3]) statCards[3].textContent = reservData.total ?? '—';
+
+    // Remplacer les visites hardcodées
+    renderVisitesDashboard(avenir.slice(0, 5));
+
+    // Activité récente
+    renderActiviteRecente(reservations.slice(0, 4));
+
+  } catch(e) {
+    console.warn('Erreur chargement dashboard:', e);
+  }
+}
+
+function renderVisitesDashboard(reservations) {
+  const card = document.querySelector('#page-dashboard .card');
+  if(!card) return;
+
+  // Supprimer les anciennes visites hardcodées
+  card.querySelectorAll('.visite-row').forEach(r => r.remove());
+
+  if(!reservations.length) {
+    const empty = document.createElement('div');
+    empty.style.cssText = 'padding:24px;text-align:center;color:var(--muted);font-size:0.84rem;';
+    empty.textContent = 'Aucune visite à venir.';
+    card.appendChild(empty);
+    return;
+  }
+
+  reservations.forEach(r => {
+    const date = new Date(r.date + 'T12:00:00');
+    const jour = String(date.getDate()).padStart(2, '0');
+    const mois = MOIS_FR[date.getMonth()];
+    const heure = r.heure ? r.heure.replace(':', 'h') : '—';
+
+    const row = document.createElement('div');
+    row.className = 'visite-row';
+    row.innerHTML = `
+      <div class="visite-date-block">
+        <div class="visite-date-day">${jour}</div>
+        <div class="visite-date-month">${mois}</div>
+      </div>
+      <div class="visite-info">
+        <div class="visite-bien">${r.bien || '—'}</div>
+        <div class="visite-client">${r.prenom} ${r.nom} · ${r.telephone || ''}</div>
+      </div>
+      <div class="visite-heure">${heure}</div>
+      <div class="visite-status">
+        <span class="status-pill confirmed"><span class="status-dot"></span>Confirmé</span>
+      </div>
+      <div class="visite-actions">
+        <div class="action-btn" title="Email: ${r.email}">👤</div>
+      </div>`;
+    card.appendChild(row);
+  });
+}
+
+function renderActiviteRecente(reservations) {
+  const card = document.querySelector('#page-dashboard .right-col .card:last-child');
+  if(!card) return;
+
+  const existingNotifs = card.querySelectorAll('.notif-item');
+  existingNotifs.forEach(n => n.remove());
+
+  if(!reservations.length) {
+    const empty = document.createElement('div');
+    empty.style.cssText = 'padding:20px;text-align:center;color:var(--muted);font-size:0.82rem;';
+    empty.textContent = 'Aucune activité récente.';
+    card.appendChild(empty);
+    return;
+  }
+
+  reservations.forEach((r, i) => {
+    const item = document.createElement('div');
+    item.className = 'notif-item';
+    item.innerHTML = `
+      <div class="notif-dot ${i < 2 ? 'new' : 'read'}"></div>
+      <div>
+        <div class="notif-text"><strong>${r.prenom} ${r.nom}</strong> a réservé une visite pour le ${r.date} à ${r.heure}</div>
+        <div class="notif-time">${new Date(r.createdAt).toLocaleDateString('fr-FR', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+      </div>`;
+    card.appendChild(item);
+  });
+}
+
+// ── AUTO-LOGIN si token existant ────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const token = getToken();
+  const agent = getAgent();
+  if (token && agent) {
+    fetch(`${API}/api/me`, { headers: { 'Authorization': `Bearer ${token}` } })
+      .then(r => {
+        if (r.ok) {
+          document.getElementById('login-screen').classList.add('hidden');
+          initDashboard(agent);
+        } else {
+          localStorage.removeItem('visitpro_token');
+          localStorage.removeItem('visitpro_agent');
+        }
+      })
+      .catch(() => {
+        document.getElementById('login-screen').classList.add('hidden');
+        initDashboard(agent);
+      });
+  }
+});
+</script>
 
 </body>
 </html>
