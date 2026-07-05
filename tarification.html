@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VisitPro — Tarifs</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0C0C0E;
+  --surface: #141416;
+  --surface2: #1C1C1F;
+  --border: #28282D;
+  --gold: #D4A853;
+  --gold-light: #E8C97A;
+  --gold-dim: #7A5E2A;
+  --text: #F0EDE8;
+  --muted: #6B6860;
+  --soft: #9E9890;
+  --green: #4CAF7D;
+  --red: #E05A5A;
+  --blue: #5A9BE0;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* FOND ANIMÉ */
+.bg-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.bg-glow::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 600px;
+  background: radial-gradient(ellipse, rgba(212,168,83,0.07) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.bg-glow::after {
+  content: '';
+  position: absolute;
+  bottom: 10%;
+  right: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(90,155,224,0.05) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+/* NAVBAR */
+.navbar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 60px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(12,12,14,0.8);
+  backdrop-filter: blur(12px);
+}
+.nav-logo {
+  font-family: 'Fraunces', serif;
+  font-size: 1.5rem;
+  color: var(--gold);
+  letter-spacing: 0.02em;
+}
+.nav-links {
+  display: flex;
+  gap: 32px;
+  font-size: 0.88rem;
+  color: var(--soft);
+}
+.nav-links a {
+  color: var(--soft);
+  text-decoration: none;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-actions { display: flex; gap: 10px; }
+
+/* BOUTONS */
+.btn {
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.86rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+.btn-ghost {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--soft);
+}
+.btn-ghost:hover { border-color: var(--soft); color: var(--text); }
+.btn-gold {
+  background: var(--gold);
+  color: #0C0C0E;
+  font-weight: 600;
+}
+.btn-gold:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(212,168,83,0.25); }
+.btn-outline-gold {
+  background: none;
+  border: 1.5px solid var(--gold-dim);
+  color: var(--gold);
+  font-weight: 500;
+}
+.btn-outline-gold:hover { background: rgba(212,168,83,0.08); border-color: var(--gold); }
+.btn-lg {
+  padding: 14px 32px;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  width: 100%;
+}
+
+/* HERO */
+.hero {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 80px 40px 56px;
+}
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(212,168,83,0.1);
+  border: 1px solid var(--gold-dim);
+  color: var(--gold);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+.hero-title {
+  font-family: 'Fraunces', serif;
+  font-size: 3.2rem;
+  font-weight: 300;
+  line-height: 1.15;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+.hero-title em {
+  font-style: italic;
+  color: var(--gold);
+}
+.hero-sub {
+  font-size: 1.05rem;
+  color: var(--soft);
+  font-weight: 300;
+  max-width: 480px;
+  margin: 0 auto 36px;
+  line-height: 1.65;
+}
+
+/* TOGGLE FACTURATION */
+.billing-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  padding: 6px 6px 6px 20px;
+  font-size: 0.84rem;
+}
+.billing-toggle span { color: var(--soft); }
+.billing-toggle span.active { color: var(--text); font-weight: 600; }
+.toggle-switch {
+  width: 48px; height: 26px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.toggle-switch.on { background: var(--gold); border-color: var(--gold); }
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 20px; height: 20px;
+  background: white;
+  border-radius: 50%;
+  top: 2px; left: 2px;
+  transition: left 0.3s;
+}
+.toggle-switch.on::after { left: 24px; }
+.badge-save {
+  background: rgba(76,175,125,0.15);
+  color: var(--green);
+  border: 1px solid rgba(76,175,125,0.3);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-right: 8px;
+}
+
+/* GRILLE PLANS */
+.plans-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 40px 80px;
+}
+
+.plan-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 28px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+  animation: fadeUp 0.5s ease both;
+}
+.plan-card:nth-child(1) { animation-delay: 0.1s; }
+.plan-card:nth-child(2) { animation-delay: 0.2s; }
+.plan-card:nth-child(3) { animation-delay: 0.3s; }
+.plan-card:hover { transform: translateY(-4px); }
+.plan-card.popular {
+  border-color: var(--gold-dim);
+  background: linear-gradient(160deg, #1A1810 0%, var(--surface) 60%);
+}
+.plan-card.popular:hover { border-color: var(--gold); }
+
+.popular-badge {
+  position: absolute;
+  top: 20px; right: 20px;
+  background: var(--gold);
+  color: var(--bg);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.plan-name {
+  font-family: 'Fraunces', serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  margin-bottom: 6px;
+}
+.plan-desc {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+.plan-price-block { margin-bottom: 6px; }
+.plan-price {
+  font-family: 'Fraunces', serif;
+  font-size: 3rem;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--text);
+}
+.plan-price sup {
+  font-size: 1.2rem;
+  vertical-align: super;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  color: var(--soft);
+}
+.plan-price sub {
+  font-size: 0.9rem;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--muted);
+}
+.plan-price-annual {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 4px;
+  min-height: 18px;
+}
+.plan-price-annual span { color: var(--green); font-weight: 600; }
+.plan-trial {
+  font-size: 0.76rem;
+  color: var(--soft);
+  margin-bottom: 28px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+.plan-trial strong { color: var(--gold); }
+
+.plan-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 20px 0;
+}
+
+.feature-list { list-style: none; margin-bottom: 28px; }
+.feature-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 7px 0;
+  font-size: 0.84rem;
+  color: var(--soft);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.feature-list li:last-child { border-bottom: none; }
+.feature-list li.highlight { color: var(--text); font-weight: 500; }
+.feat-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+.feat-icon.check { color: var(--green); }
+.feat-icon.cross { color: var(--border); }
+
+/* SMS BLOCK */
+.sms-block {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+.sms-block-title {
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.sms-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  margin-bottom: 6px;
+}
+.sms-row:last-child { margin-bottom: 0; }
+.sms-row .label { color: var(--muted); }
+.sms-row .val { font-weight: 600; color: var(--text); }
+.sms-row .val.gold { color: var(--gold); }
+.sms-alert {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: rgba(212,168,83,0.06);
+  border-radius: 6px;
+  font-size: 0.72rem;
+  color: var(--gold);
+  border: 1px solid rgba(212,168,83,0.15);
+}
+
+/* SECTION CONNEXION / INSCRIPTION */
+.auth-section {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 40px 100px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.auth-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 36px 40px;
+  animation: fadeUp 0.5s ease 0.4s both;
+}
+.auth-card.highlight { border-color: var(--gold-dim); }
+.auth-eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.auth-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.6rem;
+  font-weight: 400;
+  margin-bottom: 6px;
+}
+.auth-sub {
+  font-size: 0.84rem;
+  color: var(--muted);
+  margin-bottom: 28px;
+  line-height: 1.55;
+}
+.auth-field { margin-bottom: 16px; }
+.auth-field label {
+  display: block;
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+.auth-field input, .auth-field select {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.auth-field input:focus, .auth-field select:focus { border-color: var(--gold-dim); }
+.auth-field input::placeholder { color: var(--muted); }
+.auth-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.auth-forgot {
+  text-align: right;
+  font-size: 0.76rem;
+  color: var(--gold);
+  cursor: pointer;
+  margin-top: -8px;
+  margin-bottom: 20px;
+}
+.auth-forgot:hover { opacity: 0.8; }
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+.auth-divider::before, .auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.auth-terms {
+  font-size: 0.74rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 14px;
+  line-height: 1.5;
+}
+.auth-terms a { color: var(--gold); cursor: pointer; text-decoration: none; }
+.plan-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.plan-option {
+  padding: 10px 8px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.plan-option:hover { border-color: var(--gold-dim); }
+.plan-option.selected { background: rgba(212,168,83,0.1); border-color: var(--gold); }
+.plan-option-name { font-size: 0.84rem; font-weight: 600; }
+.plan-option-price { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+.plan-option.selected .plan-option-price { color: var(--gold); }
+
+/* FAQ RAPIDE */
+.faq-section {
+  position: relative;
+  z-index: 1;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 40px 80px;
+}
+.faq-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.8rem;
+  font-weight: 300;
+  text-align: center;
+  margin-bottom: 32px;
+}
+.faq-item {
+  border-bottom: 1px solid var(--border);
+  padding: 18px 0;
+  cursor: pointer;
+}
+.faq-item:first-of-type { border-top: 1px solid var(--border); }
+.faq-q {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+.faq-arrow { color: var(--muted); transition: transform 0.2s; font-size: 1rem; }
+.faq-item.open .faq-arrow { transform: rotate(180deg); color: var(--gold); }
+.faq-a {
+  font-size: 0.84rem;
+  color: var(--muted);
+  line-height: 1.65;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s, padding 0.3s;
+}
+.faq-item.open .faq-a { max-height: 200px; padding-top: 12px; }
+
+/* FOOTER */
+.footer {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 32px 40px;
+  border-top: 1px solid var(--border);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.footer-logo {
+  font-family: 'Fraunces', serif;
+  font-size: 1.1rem;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+/* ANIMATIONS */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.hero { animation: fadeUp 0.6s ease both; }
+
+/* MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 32px;
+  width: 420px;
+  max-width: 90vw;
+  text-align: center;
+  animation: fadeUp 0.3s ease;
+}
+.modal-icon { font-size: 2.5rem; margin-bottom: 14px; }
+.modal-title { font-family:'Fraunces',serif; font-size:1.4rem; margin-bottom:8px; }
+.modal-text { font-size:0.84rem; color:var(--muted); line-height:1.6; margin-bottom:24px; }
+
+@media (max-width: 900px) {
+  .plans-grid { grid-template-columns: 1fr; max-width: 420px; }
+  .auth-section { grid-template-columns: 1fr; }
+  .navbar { padding: 16px 24px; }
+  .hero-title { font-size: 2.2rem; }
+  .plans-grid { padding: 0 20px 60px; }
+  .auth-section { padding: 0 20px 60px; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-logo">VisitPro</div>
+  <div class="nav-links">
+    <a onclick="scrollTo('plans')">Tarifs</a>
+    <a onclick="scrollTo('auth')">Connexion</a>
+    <a onclick="scrollTo('faq')">FAQ</a>
+  </div>
+  <div class="nav-actions">
+    <button class="btn btn-ghost" onclick="scrollToAuth('login')">Se connecter</button>
+    <button class="btn btn-gold" onclick="scrollToAuth('register')">Essai gratuit 21 jours</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">✦ Tarification simple et transparente</div>
+  <h1 class="hero-title">Le bon plan pour<br><em>chaque agent</em></h1>
+  <p class="hero-sub">21 jours d'essai gratuit, sans carte bancaire. Résiliez à tout moment.</p>
+
+  <!-- TOGGLE MENSUEL / ANNUEL -->
+  <div class="billing-toggle">
+    <span id="label-monthly" class="active">Mensuel</span>
+    <div class="toggle-switch" id="billing-switch" onclick="toggleBilling()"></div>
+    <span id="label-annual">Annuel</span>
+    <span class="badge-save">−15%</span>
+  </div>
+</section>
+
+<!-- PLANS -->
+<section class="plans-grid" id="plans">
+
+  <!-- STARTER -->
+  <div class="plan-card">
+    <div class="plan-name">Starter</div>
+    <div class="plan-desc">Pour les agents qui débutent ou testent la plateforme.</div>
+    <div class="plan-price-block">
+      <div class="plan-price"><sup>€</sup><span id="price-starter">29</span><sub>/mois</sub></div>
+    </div>
+    <div class="plan-price-annual" id="annual-starter"></div>
+    <div class="plan-trial">🎁 <strong>21 jours gratuits</strong> — sans CB requise</div>
+
+    <div class="sms-block">
+      <div class="sms-block-title">📱 Quota SMS</div>
+      <div class="sms-row"><span class="label">Inclus / mois</span><span class="val gold">100 SMS</span></div>
+      <div class="sms-alert">🔔 Alerte automatique à 80% du quota</div>
+    </div>
+
+    <div class="sms-block" style="border-color:rgba(255,255,255,0.06);">
+      <div class="sms-block-title">⚡ Options à la carte</div>
+      <div class="sms-row"><span class="label">🏠 +5 biens supplémentaires</span><span class="val gold">+5€/mois</span></div>
+      <div class="sms-row" style="opacity:0.5;"><span class="label">📱 Pack SMS</span><span class="val">Bientôt</span></div>
+    </div>
+      <li><span class="feat-icon check">✓</span> Page de réservation par bien</li>
+      <li><span class="feat-icon check">✓</span> SMS de confirmation</li>
+      <li><span class="feat-icon check">✓</span> SMS de rappel J-1 et H-2</li>
+      <li><span class="feat-icon check">✓</span> Calendrier des visites</li>
+      <li><span class="feat-icon check">✓</span> Fiches clients</li>
+      <li style="color:var(--border);"><span class="feat-icon cross">✗</span> Sync Google Calendar</li>
+      <li style="color:var(--border);"><span class="feat-icon cross">✗</span> Statistiques avancées</li>
+      <li style="color:var(--border);"><span class="feat-icon cross">✗</span> Multi-agents</li>
+    </ul>
+
+    <button class="btn btn-outline-gold btn-lg" onclick="selectPlan('Starter',29)">Commencer gratuitement</button>
+  </div>
+
+  <!-- PRO -->
+  <div class="plan-card popular">
+    <div class="popular-badge">⭐ Populaire</div>
+    <div class="plan-name" style="color:var(--gold)">Pro</div>
+    <div class="plan-desc">L'essentiel pour un agent actif qui veut gagner du temps au quotidien.</div>
+    <div class="plan-price-block">
+      <div class="plan-price" style="color:var(--gold)"><sup>€</sup><span id="price-pro">59</span><sub>/mois</sub></div>
+    </div>
+    <div class="plan-price-annual" id="annual-pro"></div>
+    <div class="plan-trial" style="border-color:rgba(212,168,83,0.2);background:rgba(212,168,83,0.05);">🎁 <strong>21 jours gratuits</strong> — sans CB requise</div>
+
+    <div class="sms-block" style="border-color:rgba(212,168,83,0.2);">
+      <div class="sms-block-title">📱 Quota SMS</div>
+      <div class="sms-row"><span class="label">Inclus / mois</span><span class="val gold">400 SMS</span></div>
+      <div class="sms-alert">🔔 Alerte automatique à 80% du quota</div>
+    </div>
+
+    <div class="sms-block" style="border-color:rgba(212,168,83,0.15);">
+      <div class="sms-block-title">⚡ Options à la carte</div>
+      <div class="sms-row"><span class="label">🏠 +5 biens supplémentaires</span><span class="val gold">+5€/mois</span></div>
+      <div class="sms-row" style="opacity:0.5;"><span class="label">📱 Pack SMS</span><span class="val">Bientôt</span></div>
+    </div>
+      <li><span class="feat-icon check">✓</span> Page de réservation par bien</li>
+      <li><span class="feat-icon check">✓</span> SMS confirmation + rappels</li>
+      <li><span class="feat-icon check">✓</span> <strong>Sync Google Calendar</strong></li>
+      <li><span class="feat-icon check">✓</span> Calendrier des visites</li>
+      <li><span class="feat-icon check">✓</span> Fiches clients + recommandations</li>
+      <li><span class="feat-icon check">✓</span> Statistiques de base</li>
+      <li><span class="feat-icon check">✓</span> Personnalisation SMS</li>
+      <li style="color:var(--border);"><span class="feat-icon cross">✗</span> Multi-agents</li>
+    </ul>
+
+    <button class="btn btn-gold btn-lg" onclick="selectPlan('Pro',59)">Commencer gratuitement</button>
+  </div>
+
+  <!-- AGENCE -->
+  <div class="plan-card">
+    <div class="plan-name">Agence</div>
+    <div class="plan-desc">Pour les agences avec plusieurs agents et un volume élevé de biens.</div>
+    <div class="plan-price-block">
+      <div class="plan-price"><sup>€</sup><span id="price-agence">159</span><sub>/mois</sub></div>
+    </div>
+    <div class="plan-price-annual" id="annual-agence"></div>
+    <div class="plan-trial">🎁 <strong>21 jours gratuits</strong> — sans CB requise</div>
+
+    <div class="sms-block">
+      <div class="sms-block-title">📱 Quota SMS</div>
+      <div class="sms-row"><span class="label">Inclus / mois</span><span class="val gold">1 000 SMS</span></div>
+      <div class="sms-alert">🔔 Alerte automatique à 80% du quota</div>
+    </div>
+
+    <ul class="feature-list">
+      <li class="highlight"><span class="feat-icon check">✓</span> <strong>Biens illimités</strong></li>
+      <li><span class="feat-icon check">✓</span> Tout le plan Pro inclus</li>
+      <li><span class="feat-icon check">✓</span> <strong>Multi-agents</strong> sur un compte</li>
+      <li><span class="feat-icon check">✓</span> Statistiques avancées</li>
+      <li><span class="feat-icon check">✓</span> Logo & branding agence</li>
+      <li><span class="feat-icon check">✓</span> Tableau de bord agence</li>
+      <li><span class="feat-icon check">✓</span> Support prioritaire</li>
+      <li><span class="feat-icon check">✓</span> Export CSV clients & visites</li>
+      <li><span class="feat-icon check">✓</span> Onboarding personnalisé</li>
+    </ul>
+
+    <button class="btn btn-outline-gold btn-lg" onclick="selectPlan('Agence',159)">Commencer gratuitement</button>
+  </div>
+
+</section>
+
+<!-- CONNEXION & INSCRIPTION -->
+<section class="auth-section" id="auth">
+
+  <!-- CONNEXION -->
+  <div class="auth-card">
+    <div class="auth-eyebrow">Déjà client</div>
+    <div class="auth-title">Se connecter</div>
+    <div class="auth-sub">Accédez à votre tableau de bord et gérez vos visites.</div>
+
+    <div class="auth-field">
+      <label>Email</label>
+      <input type="email" placeholder="sophie.renaud@agence.fr">
+    </div>
+    <div class="auth-field">
+      <label>Mot de passe</label>
+      <input type="password" placeholder="••••••••">
+    </div>
+    <div class="auth-forgot">Mot de passe oublié ?</div>
+
+    <button class="btn btn-gold btn-lg" onclick="showSuccess('connexion')">Se connecter →</button>
+
+    <div class="auth-divider">ou</div>
+
+    <button class="btn btn-ghost btn-lg" style="display:flex;align-items:center;justify-content:center;gap:10px;">
+      <span>🔑</span> Continuer avec Google
+    </button>
+
+    <div class="auth-terms">
+      Pas encore de compte ?
+      <a onclick="scrollToAuth('register')">Créer un compte gratuitement</a>
+    </div>
+  </div>
+
+  <!-- INSCRIPTION -->
+  <div class="auth-card highlight" id="register-card">
+    <div class="auth-eyebrow">Nouveau sur VisitPro</div>
+    <div class="auth-title">Créer un compte</div>
+    <div class="auth-sub">21 jours gratuits, sans carte bancaire. Votre premier bien en ligne en 5 minutes.</div>
+
+    <!-- SÉLECTEUR DE PLAN -->
+    <div style="font-size:0.74rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Choisissez votre plan</div>
+    <div class="plan-selector">
+      <div class="plan-option" onclick="selectPlanOption(this,'Starter')" id="opt-starter">
+        <div class="plan-option-name">Starter</div>
+        <div class="plan-option-price">29€/mois</div>
+      </div>
+      <div class="plan-option selected" onclick="selectPlanOption(this,'Pro')" id="opt-pro">
+        <div class="plan-option-name">Pro ⭐</div>
+        <div class="plan-option-price">59€/mois</div>
+      </div>
+      <div class="plan-option" onclick="selectPlanOption(this,'Agence')" id="opt-agence">
+        <div class="plan-option-name">Agence</div>
+        <div class="plan-option-price">159€/mois</div>
+      </div>
+    </div>
+
+    <div class="auth-row">
+      <div class="auth-field">
+        <label>Prénom</label>
+        <input type="text" placeholder="Sophie">
+      </div>
+      <div class="auth-field">
+        <label>Nom</label>
+        <input type="text" placeholder="Renaud">
+      </div>
+    </div>
+    <div class="auth-field">
+      <label>Email professionnel</label>
+      <input type="email" placeholder="sophie.renaud@agence.fr">
+    </div>
+    <div class="auth-field">
+      <label>Nom de l'agence</label>
+      <input type="text" placeholder="Martineau Immobilier">
+    </div>
+    <div class="auth-field">
+      <label>Mot de passe</label>
+      <input type="password" placeholder="8 caractères minimum">
+    </div>
+
+    <button class="btn btn-gold btn-lg" onclick="showSuccess('inscription')">Démarrer mon essai gratuit →</button>
+
+    <div class="auth-terms">
+      En créant un compte vous acceptez nos <a href="#">CGU</a> et notre <a href="#">Politique de confidentialité</a>
+    </div>
+  </div>
+
+</section>
+
+<!-- FAQ -->
+<section class="faq-section" id="faq">
+  <div class="faq-title">Questions fréquentes</div>
+
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">Puis-je changer de plan à tout moment ? <span class="faq-arrow">▾</span></div>
+    <div class="faq-a">Oui, vous pouvez upgrader ou downgrader votre plan à tout moment depuis votre tableau de bord. Le changement prend effet immédiatement, avec un ajustement au prorata sur votre prochaine facture.</div>
+  </div>
+
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">Que se passe-t-il si je dépasse mon quota SMS ? <span class="faq-arrow">▾</span></div>
+    <div class="faq-a">Vous recevez une alerte automatique à 80% du quota. Au-delà du quota, les SMS sont suspendus jusqu'à ce que vous achetiez un pack de recharge depuis votre tableau de bord. Les réservations continuent de fonctionner, seuls les SMS sont impactés.</div>
+  </div>
+
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">La sync Google Calendar est-elle incluse sur tous les plans ? <span class="faq-arrow">▾</span></div>
+    <div class="faq-a">La synchronisation Google Calendar est disponible à partir du plan Pro. Sur le plan Starter, les visites sont visibles uniquement dans le calendrier VisitPro.</div>
+  </div>
+
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">Comment fonctionne l'essai gratuit de 21 jours ? <span class="faq-arrow">▾</span></div>
+    <div class="faq-a">Vous accédez à toutes les fonctionnalités du plan choisi pendant 21 jours, sans renseigner de carte bancaire. À l'issue de l'essai, vous choisissez de continuer en renseignant vos infos de paiement, ou votre compte est automatiquement suspendu sans frais.</div>
+  </div>
+
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">Le plan Agence permet combien d'agents ? <span class="faq-arrow">▾</span></div>
+    <div class="faq-a">Le plan Agence n'a pas de limite sur le nombre d'agents. Chaque agent dispose de son propre espace avec ses biens, son calendrier et ses clients, le tout visible depuis un tableau de bord directeur d'agence.</div>
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-logo">VisitPro</div>
+  <div>© 2025 VisitPro · Tous droits réservés · <a href="#" style="color:var(--gold);text-decoration:none;">CGU</a> · <a href="#" style="color:var(--gold);text-decoration:none;">Confidentialité</a></div>
+</footer>
+
+<!-- MODAL SUCCÈS -->
+<div class="modal-overlay" id="success-modal" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-icon" id="modal-icon">🎉</div>
+    <div class="modal-title" id="modal-title">Bienvenue sur VisitPro !</div>
+    <div class="modal-text" id="modal-text">Votre essai gratuit de 21 jours commence maintenant. Vous allez être redirigé vers votre tableau de bord.</div>
+    <button class="btn btn-gold" style="width:100%;" onclick="closeModal()">Accéder au tableau de bord →</button>
+  </div>
+</div>
+
+<script>
+// BILLING TOGGLE
+let isAnnual = false;
+const prices = { starter:29, pro:59, agence:159 };
+
+function toggleBilling() {
+  isAnnual = !isAnnual;
+  const sw = document.getElementById('billing-switch');
+  sw.classList.toggle('on', isAnnual);
+  document.getElementById('label-monthly').classList.toggle('active', !isAnnual);
+  document.getElementById('label-annual').classList.toggle('active', isAnnual);
+  updatePrices();
+}
+
+function updatePrices() {
+  Object.entries(prices).forEach(([plan, monthly]) => {
+    const annual = Math.round(monthly * 12 * 0.85);
+    const monthly_annual = Math.round(monthly * 0.85);
+    document.getElementById('price-'+plan).textContent = isAnnual ? monthly_annual : monthly;
+    const annualEl = document.getElementById('annual-'+plan);
+    annualEl.innerHTML = isAnnual
+      ? `<span>Soit ${annual}€/an</span> · <span style="color:var(--green);font-weight:600;">−15% économisé</span>`
+      : '';
+  });
+}
+
+// PLAN SELECTION
+function selectPlan(name, price) {
+  selectPlanOption(document.getElementById('opt-'+name.toLowerCase()), name);
+  scrollToAuth('register');
+}
+
+function selectPlanOption(el, name) {
+  document.querySelectorAll('.plan-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// SCROLL
+function scrollTo(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+function scrollToAuth(tab) {
+  document.getElementById('auth').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// FAQ
+function toggleFaq(item) {
+  item.classList.toggle('open');
+}
+
+// MODAL SUCCÈS
+function showSuccess(type) {
+  const modal = document.getElementById('success-modal');
+  const icon = document.getElementById('modal-icon');
+  const title = document.getElementById('modal-title');
+  const text = document.getElementById('modal-text');
+  if(type === 'connexion') {
+    icon.textContent = '👋';
+    title.textContent = 'Bon retour !';
+    text.textContent = 'Connexion réussie. Vous allez être redirigé vers votre tableau de bord.';
+  } else {
+    icon.textContent = '🎉';
+    title.textContent = 'Bienvenue sur VisitPro !';
+    text.textContent = 'Votre essai gratuit de 21 jours commence maintenant. Ajoutez votre premier bien en moins de 5 minutes.';
+  }
+  modal.classList.add('open');
+}
+function closeModal() {
+  document.getElementById('success-modal').classList.remove('open');
+}
+</script>
+</body>
+</html>

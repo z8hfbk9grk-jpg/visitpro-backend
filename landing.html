@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VisitPro — Automatisez vos visites immobilières</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0A0908;
+  --cream: #F5F0E8;
+  --cream2: #EDE7D9;
+  --gold: #C4973A;
+  --gold-light: #DDB96A;
+  --gold-pale: #F0E4C8;
+  --charcoal: #1C1A18;
+  --muted: #8A8278;
+  --soft: #B5AFA5;
+  --white: #FDFCFA;
+  --green: #2D6A4F;
+  --red: #C1121F;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* ─── GRAIN TEXTURE ─────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.4;
+}
+
+/* ─── NAVBAR ─────────────────────────────────── */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 60px;
+  background: rgba(245,240,232,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(196,151,58,0.15);
+  transition: all 0.3s;
+}
+.nav.scrolled {
+  padding: 14px 60px;
+  background: rgba(245,240,232,0.95);
+}
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+}
+.nav-logo span { color: var(--gold); }
+.nav-links {
+  display: flex;
+  gap: 36px;
+  font-size: 0.88rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+.nav-links a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+.nav-links a:hover { color: var(--ink); }
+.nav-cta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.btn-nav-ghost {
+  padding: 9px 20px;
+  border: 1px solid rgba(196,151,58,0.4);
+  border-radius: 4px;
+  background: none;
+  color: var(--gold);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.84rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-nav-ghost:hover { background: var(--gold-pale); border-color: var(--gold); }
+.btn-nav-primary {
+  padding: 9px 22px;
+  background: var(--ink);
+  color: var(--cream);
+  border: none;
+  border-radius: 4px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.84rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-nav-primary:hover { background: var(--charcoal); transform: translateY(-1px); }
+
+/* ─── HERO ───────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 120px 40px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Cercles décoratifs */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  right: -15%;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  border: 1px solid rgba(196,151,58,0.12);
+  pointer-events: none;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -10%;
+  left: -10%;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  border: 1px solid rgba(196,151,58,0.08);
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--gold-pale);
+  border: 1px solid rgba(196,151,58,0.3);
+  color: var(--gold);
+  padding: 6px 16px;
+  border-radius: 2px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  animation: fadeUp 0.8s ease both;
+}
+.hero-badge-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(3.5rem, 7vw, 6rem);
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+  max-width: 900px;
+  animation: fadeUp 0.8s ease 0.1s both;
+}
+.hero-title em {
+  font-style: italic;
+  color: var(--gold);
+}
+.hero-title strong {
+  font-weight: 600;
+}
+
+.hero-sub {
+  font-size: 1.1rem;
+  color: var(--muted);
+  font-weight: 300;
+  max-width: 520px;
+  line-height: 1.7;
+  margin-bottom: 48px;
+  animation: fadeUp 0.8s ease 0.2s both;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 64px;
+  animation: fadeUp 0.8s ease 0.3s both;
+}
+.btn-primary {
+  padding: 15px 36px;
+  background: var(--ink);
+  color: var(--cream);
+  border: none;
+  border-radius: 4px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s;
+  letter-spacing: 0.01em;
+}
+.btn-primary:hover { background: var(--charcoal); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(10,9,8,0.2); }
+.btn-secondary {
+  padding: 15px 32px;
+  background: none;
+  border: 1px solid rgba(10,9,8,0.2);
+  color: var(--ink);
+  border-radius: 4px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-secondary:hover { border-color: var(--ink); background: rgba(10,9,8,0.04); }
+
+/* HERO STATS */
+.hero-stats {
+  display: flex;
+  gap: 48px;
+  animation: fadeUp 0.8s ease 0.4s both;
+}
+.hero-stat { text-align: center; }
+.hero-stat-val {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.4rem;
+  font-weight: 300;
+  color: var(--ink);
+  line-height: 1;
+}
+.hero-stat-val span { color: var(--gold); }
+.hero-stat-label {
+  font-size: 0.76rem;
+  color: var(--muted);
+  margin-top: 4px;
+  letter-spacing: 0.05em;
+}
+.hero-stat-divider {
+  width: 1px;
+  background: rgba(10,9,8,0.1);
+  align-self: stretch;
+}
+
+/* HERO VISUAL */
+.hero-visual {
+  width: 100%;
+  max-width: 960px;
+  margin-top: 72px;
+  animation: fadeUp 0.8s ease 0.5s both;
+  position: relative;
+}
+.hero-visual-inner {
+  background: var(--charcoal);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 40px 100px rgba(10,9,8,0.25), 0 0 0 1px rgba(255,255,255,0.05);
+  padding: 0;
+}
+.hero-visual-bar {
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.vbar-dot { width: 10px; height: 10px; border-radius: 50%; }
+.vbar-dot:nth-child(1) { background: #FF5F57; }
+.vbar-dot:nth-child(2) { background: #FEBC2E; }
+.vbar-dot:nth-child(3) { background: #28C840; }
+.vbar-url {
+  margin-left: 12px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  padding: 4px 16px;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.3);
+  font-family: monospace;
+}
+.hero-visual-screen {
+  padding: 28px 28px 24px;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 16px;
+  min-height: 320px;
+}
+
+/* Mini sidebar simulée */
+.mini-sidebar {
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mini-nav-item {
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.35);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mini-nav-item.active {
+  background: rgba(196,151,58,0.15);
+  color: #D4A853;
+  font-weight: 600;
+}
+
+/* Mini dashboard */
+.mini-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mini-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.mini-stat-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 7px;
+  padding: 12px 14px;
+}
+.mini-stat-val {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem;
+  color: rgba(255,255,255,0.9);
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.mini-stat-val.gold { color: #D4A853; }
+.mini-stat-label { font-size: 0.62rem; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.08em; }
+
+.mini-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 7px;
+  padding: 14px 16px;
+  flex: 1;
+}
+.mini-card-title { font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-bottom: 10px; letter-spacing: 0.06em; text-transform: uppercase; }
+.mini-visite-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.mini-visite-row:last-child { border: none; }
+.mini-visite-date {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  color: #D4A853;
+  width: 36px;
+}
+.mini-visite-info { flex: 1; }
+.mini-visite-name { font-size: 0.72rem; color: rgba(255,255,255,0.8); font-weight: 500; }
+.mini-visite-bien { font-size: 0.64rem; color: rgba(255,255,255,0.3); margin-top: 1px; }
+.mini-pill {
+  font-size: 0.6rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+.mini-pill.green { background: rgba(76,175,125,0.15); color: #4CAF7D; }
+.mini-pill.gold { background: rgba(212,168,83,0.15); color: #D4A853; }
+
+/* ─── SECTION LOGOS ──────────────────────────── */
+.logos-section {
+  padding: 40px 60px;
+  border-top: 1px solid rgba(10,9,8,0.08);
+  border-bottom: 1px solid rgba(10,9,8,0.08);
+  background: var(--cream2);
+  text-align: center;
+}
+.logos-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+.logos-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+.logo-item {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--soft);
+  letter-spacing: 0.04em;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.logo-item:hover { opacity: 1; }
+
+/* ─── FEATURES ───────────────────────────────── */
+.features {
+  padding: 120px 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.section-eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  font-weight: 300;
+  line-height: 1.15;
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+.section-title em { font-style: italic; color: var(--gold); }
+.section-sub {
+  font-size: 1rem;
+  color: var(--muted);
+  font-weight: 300;
+  max-width: 480px;
+  line-height: 1.7;
+  margin-bottom: 64px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  background: rgba(10,9,8,0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.feature-card {
+  background: var(--white);
+  padding: 36px 32px;
+  transition: background 0.2s;
+  cursor: default;
+}
+.feature-card:hover { background: var(--gold-pale); }
+.feature-icon {
+  width: 44px; height: 44px;
+  background: var(--gold-pale);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+  transition: background 0.2s;
+}
+.feature-card:hover .feature-icon { background: rgba(196,151,58,0.25); }
+.feature-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.feature-desc {
+  font-size: 0.86rem;
+  color: var(--muted);
+  line-height: 1.65;
+  font-weight: 300;
+}
+
+/* ─── COMMENT ÇA MARCHE ──────────────────────── */
+.how-section {
+  padding: 120px 60px;
+  background: var(--charcoal);
+  color: var(--cream);
+}
+.how-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+.how-section .section-title { color: var(--cream); }
+.how-section .section-eyebrow { color: var(--gold); }
+.how-section .section-sub { color: rgba(245,240,232,0.5); }
+
+.steps-list { display: flex; flex-direction: column; gap: 0; }
+.step-item {
+  display: flex;
+  gap: 20px;
+  padding: 24px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  cursor: default;
+  transition: all 0.2s;
+}
+.step-item:last-child { border-bottom: none; }
+.step-item:hover { padding-left: 8px; }
+.step-num {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(196,151,58,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.step-content { flex: 1; }
+.step-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--cream);
+  margin-bottom: 5px;
+}
+.step-desc {
+  font-size: 0.82rem;
+  color: rgba(245,240,232,0.45);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* Visual côté droit */
+.how-visual {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.how-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 18px 20px;
+  transition: all 0.2s;
+}
+.how-card:hover { border-color: rgba(196,151,58,0.3); background: rgba(196,151,58,0.05); }
+.how-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.how-card-icon { font-size: 1.1rem; }
+.how-card-title { font-size: 0.84rem; font-weight: 600; color: rgba(245,240,232,0.9); }
+.how-card-body { font-size: 0.78rem; color: rgba(245,240,232,0.4); line-height: 1.55; }
+.how-link-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-top: 10px;
+}
+.how-link-text {
+  flex: 1;
+  font-family: monospace;
+  font-size: 0.72rem;
+  color: var(--gold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.how-copy-btn {
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+}
+
+/* ─── TÉMOIGNAGES ────────────────────────────── */
+.testimonials {
+  padding: 120px 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.testimonial-card {
+  background: var(--white);
+  border: 1px solid rgba(10,9,8,0.08);
+  border-radius: 10px;
+  padding: 28px;
+  transition: all 0.2s;
+}
+.testimonial-card:hover { border-color: rgba(196,151,58,0.3); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(10,9,8,0.08); }
+.testimonial-stars { color: var(--gold); font-size: 0.82rem; margin-bottom: 14px; letter-spacing: 2px; }
+.testimonial-text {
+  font-size: 0.9rem;
+  color: var(--ink);
+  line-height: 1.7;
+  font-weight: 300;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.testimonial-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+.testimonial-name { font-size: 0.86rem; font-weight: 600; }
+.testimonial-role { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+
+/* ─── CTA FINAL ──────────────────────────────── */
+.cta-section {
+  padding: 120px 60px;
+  background: var(--ink);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cta-section::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(196,151,58,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+.cta-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-weight: 300;
+  color: var(--cream);
+  line-height: 1.15;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+.cta-title em { font-style: italic; color: var(--gold-light); }
+.cta-sub {
+  font-size: 1rem;
+  color: rgba(245,240,232,0.45);
+  font-weight: 300;
+  margin-bottom: 44px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.7;
+}
+.cta-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.btn-cta-primary {
+  padding: 16px 40px;
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  border-radius: 4px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.01em;
+}
+.btn-cta-primary:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(196,151,58,0.3); }
+.btn-cta-ghost {
+  padding: 16px 32px;
+  background: none;
+  border: 1px solid rgba(245,240,232,0.15);
+  color: rgba(245,240,232,0.6);
+  border-radius: 4px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-cta-ghost:hover { border-color: rgba(245,240,232,0.4); color: var(--cream); }
+.cta-note {
+  font-size: 0.78rem;
+  color: rgba(245,240,232,0.25);
+  letter-spacing: 0.04em;
+}
+
+/* ─── FOOTER ─────────────────────────────────── */
+.footer {
+  background: var(--ink);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 48px 60px 32px;
+}
+.footer-top {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 48px;
+}
+.footer-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--cream);
+  margin-bottom: 12px;
+}
+.footer-logo span { color: var(--gold); }
+.footer-desc {
+  font-size: 0.82rem;
+  color: rgba(245,240,232,0.35);
+  line-height: 1.65;
+  font-weight: 300;
+  max-width: 240px;
+}
+.footer-col-title {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.35);
+  margin-bottom: 16px;
+}
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.footer-links a {
+  font-size: 0.84rem;
+  color: rgba(245,240,232,0.5);
+  text-decoration: none;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+.footer-links a:hover { color: var(--cream); }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.76rem;
+  color: rgba(245,240,232,0.25);
+}
+
+/* ─── ANIMATIONS ─────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(24px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── RESPONSIVE ─────────────────────────────── */
+@media (max-width: 900px) {
+  .nav { padding: 16px 24px; }
+  .nav-links { display: none; }
+  .hero { padding: 100px 24px 60px; }
+  .hero-stats { gap: 24px; flex-wrap: wrap; justify-content: center; }
+  .features-grid { grid-template-columns: 1fr; }
+  .how-inner { grid-template-columns: 1fr; gap: 40px; }
+  .testimonials-grid { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+  .features, .testimonials { padding: 80px 24px; }
+  .how-section { padding: 80px 24px; }
+  .cta-section { padding: 80px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="nav" id="navbar">
+  <div class="nav-logo">Visit<span>Pro</span></div>
+  <div class="nav-links">
+    <a href="#features">Fonctionnalités</a>
+    <a href="#comment">Comment ça marche</a>
+    <a href="tarification.html">Tarifs</a>
+  </div>
+  <div class="nav-cta">
+    <button class="btn-nav-ghost" onclick="window.location='tarification.html'">Se connecter</button>
+    <button class="btn-nav-primary" onclick="window.location='tarification.html'">Essai gratuit</button>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-badge">
+    <div class="hero-badge-dot"></div>
+    Nouveau · Essai gratuit 21 jours
+  </div>
+
+  <h1 class="hero-title">
+    Vos visites immobilières<br>
+    réservées <em>automatiquement</em>,<br>
+    <strong>pendant que vous vendez</strong>
+  </h1>
+
+  <p class="hero-sub">
+    VisitPro génère un lien de réservation pour chaque bien et envoie automatiquement les SMS de confirmation et de rappel à vos clients. Collez le lien sur Leboncoin, SeLoger, Instagram ou votre site — et laissez faire.
+  </p>
+
+  <div class="hero-actions">
+    <button class="btn-primary" onclick="window.location='tarification.html'">Commencer gratuitement →</button>
+    <button class="btn-secondary" onclick="document.getElementById('comment').scrollIntoView({behavior:'smooth'})">Voir comment ça marche</button>
+  </div>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-val">5<span>h</span></div>
+      <div class="hero-stat-label">économisées par semaine</div>
+    </div>
+    <div class="hero-stat-divider"></div>
+    <div class="hero-stat">
+      <div class="hero-stat-val">0<span>€</span></div>
+      <div class="hero-stat-label">pour démarrer</div>
+    </div>
+    <div class="hero-stat-divider"></div>
+    <div class="hero-stat">
+      <div class="hero-stat-val">21<span>j</span></div>
+      <div class="hero-stat-label">d'essai sans CB</div>
+    </div>
+    <div class="hero-stat-divider"></div>
+    <div class="hero-stat">
+      <div class="hero-stat-val">3<span>min</span></div>
+      <div class="hero-stat-label">pour le premier bien</div>
+    </div>
+  </div>
+
+  <!-- APERÇU DE L'APP -->
+  <div class="hero-visual">
+    <div class="hero-visual-inner">
+      <div class="hero-visual-bar">
+        <div class="vbar-dot"></div>
+        <div class="vbar-dot"></div>
+        <div class="vbar-dot"></div>
+        <div class="vbar-url">app.visitpro.io/dashboard</div>
+      </div>
+      <div class="hero-visual-screen">
+        <!-- Mini sidebar -->
+        <div class="mini-sidebar">
+          <div style="font-size:0.9rem;font-family:'Cormorant Garamond',serif;color:#D4A853;margin-bottom:12px;padding:0 4px;">VisitPro</div>
+          <div class="mini-nav-item active">◈ &nbsp;Tableau de bord</div>
+          <div class="mini-nav-item">📅 &nbsp;Mes visites</div>
+          <div class="mini-nav-item">🏠 &nbsp;Mes biens</div>
+          <div class="mini-nav-item">👥 &nbsp;Clients</div>
+          <div style="margin-top:12px;border-top:1px solid rgba(255,255,255,0.05);padding-top:12px;">
+          <div class="mini-nav-item">⏱ &nbsp;Disponibilités</div>
+          <div class="mini-nav-item">💬 &nbsp;SMS & Emails</div>
+          <div class="mini-nav-item">⚙️ &nbsp;Mon compte</div>
+          </div>
+        </div>
+        <!-- Mini dashboard -->
+        <div class="mini-dashboard">
+          <div class="mini-stats-row">
+            <div class="mini-stat-card">
+              <div class="mini-stat-val gold">24</div>
+              <div class="mini-stat-label">Visites ce mois</div>
+            </div>
+            <div class="mini-stat-card">
+              <div class="mini-stat-val">7</div>
+              <div class="mini-stat-label">Cette semaine</div>
+            </div>
+            <div class="mini-stat-card">
+              <div class="mini-stat-val">34</div>
+              <div class="mini-stat-label">Biens actifs</div>
+            </div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-card-title">Prochaines visites</div>
+            <div class="mini-visite-row">
+              <div class="mini-visite-date">02</div>
+              <div class="mini-visite-info">
+                <div class="mini-visite-name">Marie Dupont</div>
+                <div class="mini-visite-bien">Appt Haussmannien 4P · 15h30</div>
+              </div>
+              <div class="mini-pill green">Confirmé</div>
+            </div>
+            <div class="mini-visite-row">
+              <div class="mini-visite-date">03</div>
+              <div class="mini-visite-info">
+                <div class="mini-visite-name">Thomas Bernard</div>
+                <div class="mini-visite-bien">Maison 5P Vincennes · 10h00</div>
+              </div>
+              <div class="mini-pill green">Confirmé</div>
+            </div>
+            <div class="mini-visite-row">
+              <div class="mini-visite-date">03</div>
+              <div class="mini-visite-info">
+                <div class="mini-visite-name">Lucie Martin</div>
+                <div class="mini-visite-bien">Studio Paris 18e · 14h30</div>
+              </div>
+              <div class="mini-pill gold">En attente</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ LOGOS ═══════════════════════════════════ -->
+<div class="logos-section reveal">
+  <div class="logos-label">Partagez votre lien de réservation sur tous vos canaux</div>
+  <div class="logos-row">
+    <div class="logo-item">Leboncoin</div>
+    <div class="logo-item">SeLoger</div>
+    <div class="logo-item">Logic-Immo</div>
+    <div class="logo-item">PAP</div>
+    <div class="logo-item">Bien'ici</div>
+    <div class="logo-item">Instagram</div>
+    <div class="logo-item">Facebook</div>
+    <div class="logo-item">Votre site</div>
+  </div>
+</div>
+
+<!-- ═══ FEATURES ════════════════════════════════ -->
+<section class="features" id="features">
+  <div class="reveal">
+    <div class="section-eyebrow">Fonctionnalités</div>
+    <h2 class="section-title">Tout ce dont un agent<br><em>a besoin</em>, rien de plus</h2>
+    <p class="section-sub">Conçu spécifiquement pour les agents immobiliers. Simple à prendre en main, puissant au quotidien.</p>
+  </div>
+
+  <div class="features-grid reveal">
+    <div class="feature-card">
+      <div class="feature-icon">🔗</div>
+      <div class="feature-title">Lien unique par bien</div>
+      <div class="feature-desc">Chaque bien génère un lien de réservation personnalisé. Copiez-le en un clic et collez-le n'importe où.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📱</div>
+      <div class="feature-title">SMS automatiques</div>
+      <div class="feature-desc">Confirmation immédiate, rappel J-1 et rappel H-2. Vos clients ne ratent plus jamais une visite.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📅</div>
+      <div class="feature-title">Calendrier intelligent</div>
+      <div class="feature-desc">Vos disponibilités sont respectées automatiquement. Zéro chevauchement, zéro double réservation.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">👥</div>
+      <div class="feature-title">Fiches clients</div>
+      <div class="feature-desc">Historique des visites, profil acheteur, budget, financement. Tout sur vos prospects en un coup d'œil.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📆</div>
+      <div class="feature-title">Sync Google Calendar</div>
+      <div class="feature-desc">Chaque réservation s'ajoute automatiquement à votre agenda Google. Aucune saisie manuelle.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">✦</div>
+      <div class="feature-title">Recommandations clients</div>
+      <div class="feature-desc">VisitPro suggère automatiquement d'autres biens adaptés à chaque client selon son profil et ses visites.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ COMMENT ÇA MARCHE ════════════════════════ -->
+<section class="how-section" id="comment">
+  <div class="how-inner">
+    <div class="reveal">
+      <div class="section-eyebrow">Comment ça marche</div>
+      <h2 class="section-title">En place en<br><em>moins de 5 minutes</em></h2>
+      <p class="section-sub" style="color:rgba(245,240,232,0.45);">Pas besoin de formation, pas de configuration complexe. Ajoutez votre premier bien et commencez à recevoir des réservations.</p>
+
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">Créez votre compte</div>
+            <div class="step-desc">21 jours gratuits, sans carte bancaire. Votre espace est prêt en 2 minutes.</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">Ajoutez vos biens</div>
+            <div class="step-desc">Photos, adresse, description, créneaux disponibles. Un lien unique est généré pour chaque bien.</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">Partagez le lien partout</div>
+            <div class="step-desc">Collez-le sur Leboncoin, SeLoger, Instagram, votre site ou en signature d'email.</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <div class="step-title">Les clients réservent</div>
+            <div class="step-desc">Ils choisissent leur créneau, renseignent leurs infos. Vous recevez une notification instantanée.</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">5</div>
+          <div class="step-content">
+            <div class="step-title">Tout est automatisé</div>
+            <div class="step-desc">SMS envoyés, agenda mis à jour, fiche client créée. Vous n'avez plus rien à faire.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal" style="display:flex;flex-direction:column;gap:12px;">
+      <div class="how-card">
+        <div class="how-card-header">
+          <div class="how-card-icon">🔗</div>
+          <div class="how-card-title">Lien de réservation généré</div>
+        </div>
+        <div class="how-card-body">Copiez ce lien et collez-le dans vos annonces</div>
+        <div class="how-link-box">
+          <div class="how-link-text">visitpro.io/visite/martineau/appt-paris-11e</div>
+          <button class="how-copy-btn" onclick="this.textContent='✓';setTimeout(()=>this.textContent='Copier',1500)">Copier</button>
+        </div>
+      </div>
+
+      <div class="how-card">
+        <div class="how-card-header">
+          <div class="how-card-icon">📱</div>
+          <div class="how-card-title">SMS envoyé automatiquement</div>
+        </div>
+        <div class="how-card-body">"Bonjour Marie, votre visite du Appt Haussmannien est confirmée pour le 2 juin à 15h30. À bientôt ! — Martineau Immo"</div>
+      </div>
+
+      <div class="how-card">
+        <div class="how-card-header">
+          <div class="how-card-icon">📅</div>
+          <div class="how-card-title">Agenda mis à jour</div>
+        </div>
+        <div class="how-card-body">Le rendez-vous s'ajoute directement dans votre Google Calendar. Zéro saisie manuelle.</div>
+      </div>
+
+      <div class="how-card">
+        <div class="how-card-header">
+          <div class="how-card-icon">👤</div>
+          <div class="how-card-title">Fiche client créée</div>
+        </div>
+        <div class="how-card-body">Nom, email, téléphone, profil acheteur, budget, financement — tout est enregistré automatiquement.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TÉMOIGNAGES ══════════════════════════════ -->
+<section class="testimonials">
+  <div class="reveal" style="text-align:center;margin-bottom:56px;">
+    <div class="section-eyebrow">Témoignages</div>
+    <h2 class="section-title">Ce qu'en disent<br><em>les agents</em></h2>
+  </div>
+
+  <div class="testimonials-grid reveal">
+
+    <div class="testimonial-card">
+      <div class="testimonial-stars">★★★★★</div>
+      <div class="testimonial-text">"J'ai gagné au moins 5 heures par semaine. Avant je passais mes journées à répondre au téléphone pour caler des visites. Maintenant c'est automatique."</div>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar" style="background:#F0E4C8;">SR</div>
+        <div>
+          <div class="testimonial-name">Sophie Renaud</div>
+          <div class="testimonial-role">Agent — Martineau Immobilier, Paris</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="testimonial-card">
+      <div class="testimonial-stars">★★★★★</div>
+      <div class="testimonial-text">"Le lien sur Leboncoin change tout. Les clients réservent directement sans m'appeler. Et les SMS de rappel ont réduit mes no-shows de 80%."</div>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar" style="background:#E8D5F5;">TM</div>
+        <div>
+          <div class="testimonial-name">Thomas Mercier</div>
+          <div class="testimonial-role">Agent indépendant, Lyon</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="testimonial-card">
+      <div class="testimonial-stars">★★★★★</div>
+      <div class="testimonial-text">"Pour notre agence de 6 agents, VisitPro a transformé notre organisation. Plus de conflits d'agenda, plus de réservations en double. Parfait."</div>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar" style="background:#D5EFE3;">CL</div>
+        <div>
+          <div class="testimonial-name">Claire Laurent</div>
+          <div class="testimonial-role">Directrice — Agence Lumière, Bordeaux</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ CTA FINAL ════════════════════════════════ -->
+<section class="cta-section">
+  <div class="cta-eyebrow">Prêt à commencer ?</div>
+  <h2 class="cta-title">Votre premier bien en ligne<br><em>dans 5 minutes</em></h2>
+  <p class="cta-sub">21 jours gratuits, sans carte bancaire. Résiliez à tout moment, sans engagement.</p>
+  <div class="cta-actions">
+    <button class="btn-cta-primary" onclick="window.location='tarification.html'">Commencer gratuitement →</button>
+    <button class="btn-cta-ghost" onclick="window.location='tarification.html'">Voir les tarifs</button>
+  </div>
+  <div class="cta-note">Starter à partir de 29€/mois · Pro 59€/mois · Agence 159€/mois</div>
+</section>
+
+<!-- ═══ FOOTER ════════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer-top">
+    <div>
+      <div class="footer-logo">Visit<span>Pro</span></div>
+      <div class="footer-desc">La plateforme de prise de rendez-vous automatisée pour les agents immobiliers. Leboncoin, SeLoger, Instagram — un lien, partout.</div>
+    </div>
+    <div>
+      <div class="footer-col-title">Produit</div>
+      <div class="footer-links">
+        <a href="#features">Fonctionnalités</a>
+        <a href="tarification.html">Tarifs</a>
+        <a href="#comment">Comment ça marche</a>
+        <a href="tarification.html">Essai gratuit</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Ressources</div>
+      <div class="footer-links">
+        <a>Documentation</a>
+        <a>Blog</a>
+        <a>Support</a>
+        <a>Nous contacter</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Légal</div>
+      <div class="footer-links">
+        <a>CGU</a>
+        <a>Confidentialité</a>
+        <a>Mentions légales</a>
+        <a>Cookies</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2025 VisitPro — Tous droits réservés</div>
+    <div>Fait avec ♥ pour les agents immobiliers</div>
+  </div>
+</footer>
+
+<script>
+// Navbar scroll
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// Reveal on scroll
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
