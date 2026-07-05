@@ -762,7 +762,7 @@
         email: email,
         telephone: tel,
         bien: 'Appartement Haussmannien 4P',
-        date: selectedCreneau ? selectedCreneau.dateLabel : '',
+        date: selectedDate ? selectedDate.toISOString().split('T')[0] : (selectedCreneau ? selectedCreneau.dateLabel : ''),
         heure: selectedCreneau ? selectedCreneau.heure : ''
       })
     });
