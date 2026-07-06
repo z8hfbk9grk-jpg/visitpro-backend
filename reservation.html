@@ -503,34 +503,27 @@
 
   <!-- PANNEAU GAUCHE : LE BIEN -->
   <div class="bien-panel">
-    <img class="bien-img" id="bien-img" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&q=80" alt="Bien immobilier">
+    <img class="bien-img" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&q=80" alt="Bien immobilier">
     <div class="bien-overlay"></div>
     <div class="bien-info">
-      <div class="bien-tag" id="bien-type">Appartement</div>
-      <div class="bien-titre" id="bien-titre">Chargement...</div>
-      <div class="bien-adresse" id="bien-adresse">📍 Chargement...</div>
+      <div class="bien-tag" id="bien-tag">Appartement</div>
+      <div class="bien-titre" id="bien-titre">Appartement Haussmannien<br>4 pièces lumineux</div>
+      <div class="bien-adresse" id="bien-adresse">📍 18 Rue du Faubourg Saint-Antoine, Paris 11e</div>
       <div class="bien-stats">
         <div class="stat">
-          <div class="stat-val" id="bien-surface">— m²</div>
+          <div class="stat-val" id="bien-surface">87 m²</div>
           <div class="stat-label">Surface</div>
         </div>
         <div class="stat-divider"></div>
         <div class="stat">
-          <div class="stat-val" id="bien-pieces">—</div>
-          <div class="stat-label">Pièces</div>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <div class="stat-val">2</div>
-          <div class="stat-label">Chambres</div>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <div class="stat-val" id="bien-prix">— €</div>
+          <div class="stat-val" id="bien-prix">645 000 €</div>
           <div class="stat-label">Prix</div>
         </div>
       </div>
     </div>
+  </div>
+  <div id="bien-loading-error" style="display:none;position:absolute;top:16px;left:16px;right:16px;background:rgba(192,57,43,0.95);color:#fff;padding:10px 14px;border-radius:8px;font-size:0.82rem;z-index:5;">
+    ⚠️ Bien introuvable — affichage de données de démonstration.
   </div>
 
   <!-- PANNEAU DROIT : FORMULAIRE -->
@@ -673,8 +666,8 @@
         <div class="recap-row">
           <div class="recap-icon">🏠</div>
           <div class="recap-text">
-            <strong>Appartement Haussmannien 4P · 87m²</strong>
-            <span>18 Rue du Faubourg Saint-Antoine, Paris 11e</span>
+            <strong id="recap-bien-titre">Appartement Haussmannien 4P · 87m²</strong>
+            <span id="recap-bien-adresse">18 Rue du Faubourg Saint-Antoine, Paris 11e</span>
           </div>
         </div>
         <div class="recap-row">
@@ -703,6 +696,44 @@
 </div>
 
 <script>
+  // ── CHARGEMENT DU BIEN DEPUIS L'API ──────────
+  const API_BIEN = 'https://visitpro-backend-2.onrender.com';
+  const urlParams = new URLSearchParams(window.location.search);
+  const propertyId = urlParams.get('propertyId') || urlParams.get('bienId');
+  let bienActuel = null; // rempli si le fetch réussit
+
+  const TYPE_LABELS = {
+    appartement: 'Appartement',
+    maison: 'Maison',
+    studio: 'Studio',
+    bureau: 'Bureau',
+    terrain: 'Terrain'
+  };
+
+  async function chargerBien() {
+    if (!propertyId) {
+      document.getElementById('bien-loading-error').style.display = 'block';
+      document.getElementById('bien-loading-error').textContent = '⚠️ Aucun bien spécifié dans le lien — affichage de données de démonstration.';
+      return;
+    }
+    try {
+      const res = await fetch(`${API_BIEN}/api/biens/${propertyId}`);
+      if (!res.ok) throw new Error('not found');
+      const bien = await res.json();
+      bienActuel = bien;
+
+      document.getElementById('bien-tag').textContent = TYPE_LABELS[bien.type] || bien.type;
+      document.getElementById('bien-titre').textContent = bien.titre;
+      document.getElementById('bien-adresse').textContent = '📍 ' + bien.adresse;
+      document.getElementById('bien-surface').textContent = bien.surface + ' m²';
+      document.getElementById('bien-prix').textContent = Number(bien.prix).toLocaleString('fr-FR') + ' €';
+      document.title = bien.titre + ' — Réserver une visite';
+    } catch (e) {
+      document.getElementById('bien-loading-error').style.display = 'block';
+    }
+  }
+  chargerBien();
+
   // ── VALIDATION FORMULAIRE ────────────────────
   async function validerFormulaire() {
     let valid = true;
@@ -761,7 +792,8 @@
         prenom: prenom,
         email: email,
         telephone: tel,
-        bien: bienData ? bienData.titre : 'Bien immobilier',
+        bien: bienActuel ? bienActuel.titre : 'Appartement Haussmannien 4P',
+        bienId: propertyId || null,
         date: selectedDate ? selectedDate.toISOString().split('T')[0] : (selectedCreneau ? selectedCreneau.dateLabel : ''),
         heure: selectedCreneau ? selectedCreneau.heure : ''
       })
@@ -847,42 +879,6 @@
         });
       }
     } catch(e) {}
-  }
-
-  // ── CONFIG API ──────────────────────────────────────────────
-  const API = 'https://visitpro-backend-2.onrender.com';
-  let bienData = null;
-
-  // ── CHARGEMENT DU BIEN DEPUIS L'URL ─────────────────────────
-  async function chargerBien() {
-    const params = new URLSearchParams(window.location.search);
-    const bienId = params.get('bienId');
-
-    if (!bienId) {
-      // Pas de bienId dans l'URL — afficher un message d'erreur
-      document.getElementById('bien-titre').textContent = 'Lien invalide';
-      document.getElementById('bien-adresse').textContent = '📍 Ce lien de réservation est invalide.';
-      return;
-    }
-
-    try {
-      const res = await fetch(`${API}/api/biens/${bienId}`);
-      if (!res.ok) throw new Error('Bien introuvable');
-      const bien = await res.json();
-      bienData = bien;
-
-      // Mettre à jour l'affichage
-      document.getElementById('bien-titre').textContent = bien.titre || '—';
-      document.getElementById('bien-adresse').textContent = '📍 ' + (bien.adresse || '—');
-      document.getElementById('bien-type').textContent = bien.type ? bien.type.charAt(0).toUpperCase() + bien.type.slice(1) : 'Bien';
-      document.getElementById('bien-surface').textContent = bien.surface ? bien.surface + ' m²' : '— m²';
-      document.getElementById('bien-prix').textContent = bien.prix ? bien.prix.toLocaleString('fr-FR') + ' €' : '— €';
-      document.title = 'Réserver une visite — ' + bien.titre;
-
-    } catch(e) {
-      document.getElementById('bien-titre').textContent = 'Bien introuvable';
-      document.getElementById('bien-adresse').textContent = '📍 Ce bien n\'existe pas ou a été supprimé.';
-    }
   }
 
   // ── CALENDRIER DYNAMIQUE ─────────────────────
@@ -1041,11 +1037,15 @@
       if(lines[1]) {
         lines[1].querySelector('strong').textContent = selectedCreneau.dateLabel + ' à ' + selectedCreneau.heure;
       }
+      if (bienActuel) {
+        document.getElementById('recap-bien-titre').textContent = `${bienActuel.titre} · ${bienActuel.surface}m²`;
+        document.getElementById('recap-bien-adresse').textContent = bienActuel.adresse;
+      }
       // Sauvegarder la réservation dans localStorage
       try {
         const reservations = JSON.parse(localStorage.getItem('visitpro_reservations') || '[]');
         reservations.push({
-          bien: bienData ? bienData.titre : 'Bien immobilier',
+          bien: bienActuel ? bienActuel.titre : 'Appartement Haussmannien 4P',
           date: selectedCreneau.dateLabel,
           heure: selectedCreneau.heure,
           createdAt: new Date().toISOString()
@@ -1056,7 +1056,6 @@
   }
 
   // Init
-  chargerBien();
   renderResaCal();
 </script>
 
