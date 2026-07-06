@@ -503,20 +503,20 @@
 
   <!-- PANNEAU GAUCHE : LE BIEN -->
   <div class="bien-panel">
-    <img class="bien-img" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&q=80" alt="Bien immobilier">
+    <img class="bien-img" id="bien-img" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&q=80" alt="Bien immobilier">
     <div class="bien-overlay"></div>
     <div class="bien-info">
-      <div class="bien-tag">Appartement</div>
-      <div class="bien-titre">Appartement Haussmannien<br>4 pièces lumineux</div>
-      <div class="bien-adresse">📍 18 Rue du Faubourg Saint-Antoine, Paris 11e</div>
+      <div class="bien-tag" id="bien-type">Appartement</div>
+      <div class="bien-titre" id="bien-titre">Chargement...</div>
+      <div class="bien-adresse" id="bien-adresse">📍 Chargement...</div>
       <div class="bien-stats">
         <div class="stat">
-          <div class="stat-val">87 m²</div>
+          <div class="stat-val" id="bien-surface">— m²</div>
           <div class="stat-label">Surface</div>
         </div>
         <div class="stat-divider"></div>
         <div class="stat">
-          <div class="stat-val">4</div>
+          <div class="stat-val" id="bien-pieces">—</div>
           <div class="stat-label">Pièces</div>
         </div>
         <div class="stat-divider"></div>
@@ -526,7 +526,7 @@
         </div>
         <div class="stat-divider"></div>
         <div class="stat">
-          <div class="stat-val">645 000 €</div>
+          <div class="stat-val" id="bien-prix">— €</div>
           <div class="stat-label">Prix</div>
         </div>
       </div>
@@ -761,7 +761,7 @@
         prenom: prenom,
         email: email,
         telephone: tel,
-        bien: 'Appartement Haussmannien 4P',
+        bien: bienData ? bienData.titre : 'Bien immobilier',
         date: selectedDate ? selectedDate.toISOString().split('T')[0] : (selectedCreneau ? selectedCreneau.dateLabel : ''),
         heure: selectedCreneau ? selectedCreneau.heure : ''
       })
@@ -847,6 +847,42 @@
         });
       }
     } catch(e) {}
+  }
+
+  // ── CONFIG API ──────────────────────────────────────────────
+  const API = 'https://visitpro-backend-2.onrender.com';
+  let bienData = null;
+
+  // ── CHARGEMENT DU BIEN DEPUIS L'URL ─────────────────────────
+  async function chargerBien() {
+    const params = new URLSearchParams(window.location.search);
+    const bienId = params.get('bienId');
+
+    if (!bienId) {
+      // Pas de bienId dans l'URL — afficher un message d'erreur
+      document.getElementById('bien-titre').textContent = 'Lien invalide';
+      document.getElementById('bien-adresse').textContent = '📍 Ce lien de réservation est invalide.';
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/api/biens/${bienId}`);
+      if (!res.ok) throw new Error('Bien introuvable');
+      const bien = await res.json();
+      bienData = bien;
+
+      // Mettre à jour l'affichage
+      document.getElementById('bien-titre').textContent = bien.titre || '—';
+      document.getElementById('bien-adresse').textContent = '📍 ' + (bien.adresse || '—');
+      document.getElementById('bien-type').textContent = bien.type ? bien.type.charAt(0).toUpperCase() + bien.type.slice(1) : 'Bien';
+      document.getElementById('bien-surface').textContent = bien.surface ? bien.surface + ' m²' : '— m²';
+      document.getElementById('bien-prix').textContent = bien.prix ? bien.prix.toLocaleString('fr-FR') + ' €' : '— €';
+      document.title = 'Réserver une visite — ' + bien.titre;
+
+    } catch(e) {
+      document.getElementById('bien-titre').textContent = 'Bien introuvable';
+      document.getElementById('bien-adresse').textContent = '📍 Ce bien n\'existe pas ou a été supprimé.';
+    }
   }
 
   // ── CALENDRIER DYNAMIQUE ─────────────────────
@@ -1009,7 +1045,7 @@
       try {
         const reservations = JSON.parse(localStorage.getItem('visitpro_reservations') || '[]');
         reservations.push({
-          bien: 'Appartement Haussmannien 4P',
+          bien: bienData ? bienData.titre : 'Bien immobilier',
           date: selectedCreneau.dateLabel,
           heure: selectedCreneau.heure,
           createdAt: new Date().toISOString()
@@ -1020,6 +1056,7 @@
   }
 
   // Init
+  chargerBien();
   renderResaCal();
 </script>
 
