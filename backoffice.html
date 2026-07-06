@@ -5610,43 +5610,76 @@ function openAddBien() {
 function closeModal() {
   document.getElementById('modal-overlay').style.display = 'none';
 }
-function confirmAddBien() {
-  closeModal();
-  const grid = document.getElementById('biens-grid');
-  const newCard = document.createElement('div');
-  newCard.className = 'bien-card';
-  newCard.dataset.status = 'actif';
-  newCard.onclick = () => openFiche();
-  newCard.innerHTML = `
-    <div class="bien-card-img">
-      <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=70" alt="">
-      <div class="bien-card-status-badge actif">Actif</div>
-    </div>
-    <div class="bien-card-body">
-      <div class="bien-card-title">Nouveau bien ajouté</div>
-      <div class="bien-card-addr">📍 Adresse à compléter</div>
-      <div class="bien-card-price" style="color:var(--gold)">Prix à définir</div>
-      <div class="bien-card-stats">
-        <div class="bstat"><div class="bstat-val">0</div><div class="bstat-label">Visites</div></div>
-        <div class="bstat-div"></div>
-        <div class="bstat"><div class="bstat-val">0</div><div class="bstat-label">Offres</div></div>
-        <div class="bstat-div"></div>
-        <div class="bstat"><div class="bstat-val">0</div><div class="bstat-label">Clics lien</div></div>
+async function confirmAddBien() {
+  const token = getToken();
+  if(!token) { showToast('⚠️ Connectez-vous d\'abord'); return; }
+
+  // Récupérer les valeurs du formulaire
+  const inputs = document.querySelectorAll('#modal-overlay input, #modal-overlay select');
+  const type = inputs[0]?.value?.toLowerCase() || 'appartement';
+  const surface = parseInt(inputs[1]?.value) || null;
+  const adresse = inputs[2]?.value?.trim() || '';
+  const prix = parseInt(inputs[3]?.value) || null;
+  const titre = type.charAt(0).toUpperCase() + type.slice(1) + (surface ? ` ${surface}m²` : '') + (adresse ? ` · ${adresse.split(',')[0]}` : '');
+
+  if(!adresse) { showToast('⚠️ Veuillez renseigner l\'adresse'); return; }
+
+  const btn = document.querySelector('#modal-overlay .btn-gold');
+  btn.disabled = true;
+  btn.textContent = 'Création en cours...';
+
+  try {
+    const res = await fetch(`${API}/api/biens`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ titre, adresse, type, prix, surface })
+    });
+    const bien = await res.json();
+    if(!res.ok) throw new Error(bien.error || 'Erreur');
+
+    closeModal();
+    const lien = `${window.location.origin}/reservation.html?bienId=${bien.id}`;
+    const grid = document.getElementById('biens-grid');
+    const newCard = document.createElement('div');
+    newCard.className = 'bien-card';
+    newCard.dataset.status = 'actif';
+    newCard.innerHTML = `
+      <div class="bien-card-img">
+        <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=70" alt="">
+        <div class="bien-card-status-badge actif">Actif</div>
       </div>
-      <div class="bien-card-footer">
-        <button class="link-btn" onclick="copyLink(this)">🔗 Copier le lien</button>
-        <button class="link-btn primary">Voir visites →</button>
-      </div>
-    </div>`;
-  grid.prepend(newCard);
-  // Rendre la nouvelle carte cliquable
-  newCard.style.cursor = 'pointer';
-  newCard.addEventListener('click', function(e) {
-    if(e.target.closest('.bien-card-menu') || e.target.closest('.link-btn')) return;
-    openFiche();
-  });
-  // Resynchroniser le compteur de biens
-  syncBiensCount();
+      <div class="bien-card-body">
+        <div class="bien-card-title">${bien.titre}</div>
+        <div class="bien-card-addr">📍 ${bien.adresse || '—'}</div>
+        <div class="bien-card-price" style="color:var(--gold)">${bien.prix ? bien.prix.toLocaleString('fr-FR') + ' €' : 'Prix à définir'}</div>
+        <div class="bien-card-stats">
+          <div class="bstat"><div class="bstat-val">0</div><div class="bstat-label">Visites</div></div>
+          <div class="bstat-div"></div>
+          <div class="bstat"><div class="bstat-val">0</div><div class="bstat-label">Offres</div></div>
+          <div class="bstat-div"></div>
+          <div class="bstat"><div class="bstat-val">0</div><div class="bstat-label">Clics lien</div></div>
+        </div>
+        <div class="bien-card-link-block">
+          <div class="bien-card-link-label">🔗 Lien de réservation <span>· à coller sur tous vos sites</span></div>
+          <div class="bien-card-link-row">
+            <div class="bien-card-link-url">${lien}</div>
+            <button class="bien-card-copy-btn" onclick="copyLienVisible(this,'${lien}')">📋 Copier</button>
+          </div>
+        </div>
+        <div class="bien-card-footer">
+          <button class="link-btn primary">Voir visites →</button>
+        </div>
+      </div>`;
+    grid.prepend(newCard);
+    syncBiensCount();
+    showToast('✅ Bien créé ! Lien de réservation généré.');
+
+  } catch(e) {
+    showToast('❌ Erreur : ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✦ Créer le bien & générer le lien';
+  }
 }
 
 // FICHE BIEN
@@ -6028,13 +6061,15 @@ async function initDashboard(agent) {
   const headers = { 'Authorization': `Bearer ${token}` };
 
   try {
-    const [reservRes, agentStatsRes] = await Promise.all([
+    const [reservRes, agentStatsRes, biensRes] = await Promise.all([
       fetch(`${API}/api/reservations?limite=50`, { headers }),
-      fetch(`${API}/api/agents/${agent.id}/stats`)
+      fetch(`${API}/api/agents/${agent.id}/stats`),
+      fetch(`${API}/api/biens?agentId=${agent.id}`, { headers })
     ]);
 
     const reservData = await reservRes.json();
     const agentStats = await agentStatsRes.json();
+    const biensData = await biensRes.json();
 
     const reservations = reservData.data || [];
     const today = new Date();
@@ -6058,6 +6093,12 @@ async function initDashboard(agent) {
 
     // Activité récente
     renderActiviteRecente(reservations.slice(0, 4));
+
+    // Charger les vrais biens dans la page Mes biens
+    const biens = biensData.data || [];
+    if(biens.length > 0) {
+      renderBiensPage(biens, agent);
+    }
 
   } catch(e) {
     console.warn('Erreur chargement dashboard:', e);
@@ -6105,6 +6146,82 @@ function renderVisitesDashboard(reservations) {
       </div>`;
     card.appendChild(row);
   });
+}
+
+function renderBiensPage(biens, agent) {
+  const grid = document.getElementById('biens-grid');
+  if(!grid || !biens.length) return;
+
+  const baseUrl = window.location.origin;
+
+  // Vider les biens hardcodés
+  grid.innerHTML = '';
+
+  biens.forEach(b => {
+    const lien = `${baseUrl}/reservation.html?bienId=${b.id}`;
+    const card = document.createElement('div');
+    card.className = 'bien-card';
+    card.dataset.status = 'actif';
+    card.innerHTML = `
+      <div class="bien-card-img">
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&q=70" alt="">
+        <div class="bien-card-status-badge actif">Actif</div>
+        <div class="bien-card-menu" onclick="toggleBienMenu(event,'menu-${b.id}')">⋮
+          <div class="bien-dropdown" id="menu-${b.id}">
+            <div onclick="navigator.clipboard?.writeText('${lien}');showToast('✅ Lien copié !')">🔗 Copier le lien</div>
+            <div style="color:var(--red)" onclick="supprimerBien('${b.id}',this.closest('.bien-card'))">🗑 Supprimer</div>
+          </div>
+        </div>
+      </div>
+      <div class="bien-card-body">
+        <div class="bien-card-title">${b.titre}</div>
+        <div class="bien-card-addr">📍 ${b.adresse || '—'}</div>
+        <div class="bien-card-price">${b.prix ? b.prix.toLocaleString('fr-FR') + ' €' : '—'}</div>
+        <div class="bien-card-stats">
+          <div class="bstat"><div class="bstat-val">0</div><div class="bstat-label">Visites</div></div>
+          <div class="bstat-div"></div>
+          <div class="bstat"><div class="bstat-val">${b.surface || '—'}</div><div class="bstat-label">m²</div></div>
+          <div class="bstat-div"></div>
+          <div class="bstat"><div class="bstat-val">${b.type || '—'}</div><div class="bstat-label">Type</div></div>
+        </div>
+        <div class="bien-card-link-block">
+          <div class="bien-card-link-label">🔗 Lien de réservation <span>· à partager</span></div>
+          <div class="bien-card-link-row">
+            <div class="bien-card-link-url">${lien}</div>
+            <button class="bien-card-copy-btn" onclick="copyLienVisible(this,'${lien}')">📋 Copier</button>
+          </div>
+        </div>
+        <div class="bien-card-footer">
+          <button class="link-btn primary" onclick="window.open('${lien}','_blank')">👁 Voir le lien →</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  // Mettre à jour le subtitle
+  const subtitle = document.getElementById('biens-subtitle');
+  if(subtitle) subtitle.textContent = `${biens.length} bien${biens.length > 1 ? 's' : ''} · ${biens.length} actif${biens.length > 1 ? 's' : ''}`;
+
+  syncBiensCount();
+}
+
+async function supprimerBien(id, card) {
+  const token = getToken();
+  if(!token) return;
+  if(!confirm('Supprimer ce bien ?')) return;
+  try {
+    const res = await fetch(`${API}/api/biens/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if(res.ok) {
+      card.remove();
+      syncBiensCount();
+      showToast('✅ Bien supprimé');
+    }
+  } catch(e) {
+    showToast('❌ Erreur lors de la suppression');
+  }
 }
 
 function renderActiviteRecente(reservations) {
