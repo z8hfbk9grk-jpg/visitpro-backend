@@ -1,11 +1,20 @@
 import { Router, type IRouter } from "express";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
+import rateLimit from "express-rate-limit";
 import { db, agentsTable, tokensTable } from "@workspace/db";
 import { generateToken, hashPassword, verifyPassword, safeAgent } from "../lib/store";
 import { requireAuth, type AuthRequest } from "../lib/auth";
 
 const router: IRouter = Router();
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 8, // 8 tentatives max par IP
+  message: { error: "Trop de tentatives de connexion. Réessayez dans 15 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 const LoginSchema = z.object({
   email: z.string().email("Email invalide"),
@@ -24,7 +33,7 @@ const MotDePasseSchema = z.object({
   motDePasseNouveau: z.string().min(6, "Le nouveau mot de passe doit faire au moins 6 caractères"),
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   const result = LoginSchema.safeParse(req.body);
   if (!result.success) {
     res.status(400).json({ error: "Données invalides", details: result.error.issues });
