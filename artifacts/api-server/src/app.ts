@@ -23,6 +23,7 @@ app.use(
 
 // CORS restreint à tes domaines de prod (+ "null" pour tes outils de test en local)
 const allowedOrigins = [
+  "https://visitpro-backend-api-server.vercel.app",
   "https://visitpro-backend-api-server-git-main-visitpro.vercel.app",
   "https://visitpro-backend-api-server-jazy8x2bz-visitpro.vercel.app",
   "null", // fichiers HTML ouverts en local (outils de test) — à retirer une fois en vraie prod
