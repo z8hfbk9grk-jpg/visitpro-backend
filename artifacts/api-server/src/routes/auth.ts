@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db, agentsTable, tokensTable } from "@workspace/db";
-import { generateToken, hashPassword, safeAgent } from "../lib/store";
+import { generateToken, hashPassword, verifyPassword, safeAgent } from "../lib/store";
 import { requireAuth, type AuthRequest } from "../lib/auth";
 
 const router: IRouter = Router();
@@ -32,9 +32,15 @@ router.post("/login", async (req, res) => {
   }
   const { email, motDePasse } = result.data;
   const [agent] = await db.select().from(agentsTable).where(eq(agentsTable.email, email)).limit(1);
-  if (!agent || agent.passwordHash !== hashPassword(motDePasse)) {
+  if (!agent || !verifyPassword(motDePasse, agent.passwordHash)) {
     res.status(401).json({ error: "Email ou mot de passe incorrect" });
     return;
+  }
+  // Migration transparente vers le hashage sécurisé (scrypt)
+  if (!agent.passwordHash.includes(":")) {
+    await db.update(agentsTable)
+      .set({ passwordHash: hashPassword(motDePasse) })
+      .where(eq(agentsTable.id, agent.id));
   }
   const token = generateToken();
   await db.insert(tokensTable).values({ token, agentId: agent.id });
@@ -83,7 +89,7 @@ router.put("/me/mot-de-passe", requireAuth, async (req: AuthRequest, res) => {
     .where(eq(agentsTable.id, req.agentId!)).limit(1);
   if (!agent) { res.status(404).json({ error: "Agent introuvable" }); return; }
 
-  if (agent.passwordHash !== hashPassword(result.data.motDePasseActuel)) {
+  if (!verifyPassword(result.data.motDePasseActuel, agent.passwordHash)) {
     res.status(401).json({ error: "Mot de passe actuel incorrect" });
     return;
   }
