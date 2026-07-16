@@ -4449,7 +4449,22 @@ if(hasVisite) {
   content.innerHTML = html;
   panel.style.display = 'block';
 }
-
+async function sauvegarderJourBloque(key) {
+  const [y, m, d] = key.split('-').map(Number);
+  const date = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  const token = getToken();
+  if (!token) return;
+  try {
+    await fetch(`${API}/api/disponibilites/jours-bloques`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ date })
+    });
+  } catch(e) {
+    console.warn('Erreur blocage jour:', e);
+  }
+}
+  
 function dispoChangeMonth(dir) {
   dispoCalMonth += dir;
   if(dispoCalMonth > 11) { dispoCalMonth = 0; dispoCalYear++; }
