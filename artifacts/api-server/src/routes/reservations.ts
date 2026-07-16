@@ -1,8 +1,9 @@
 import { Router, type IRouter } from "express";
 import { z } from "zod";
 import { eq, and, or, ilike, desc, SQL } from "drizzle-orm";
-import { db, reservationsTable, biensTable } from "@workspace/db";
+import { db, reservationsTable, biensTable, horairesTable, joursBloquesTable } from "@workspace/db";
 import { requireAuth, type AuthRequest } from "../lib/auth";
+import { DEFAULTS_JOUR } from "./disponibilites";
 
 const router: IRouter = Router();
 
@@ -34,13 +35,48 @@ const RESA_COLS = {
   createdAt: reservationsTable.createdAt,
 };
 
-// ─── Créer une réservation (public) ────────────────────────────────────────────
+const JOURS_ORDRE = ["dim","lun","mar","mer","jeu","ven","sam"] as const;
+
+// ─── Créer une réservation (public, avec vérification des disponibilités) ─────
 router.post("/reservations", async (req, res) => {
   const result = ReservationSchema.safeParse(req.body);
   if (!result.success) {
     res.status(400).json({ error: "Données invalides", details: result.error.issues });
     return;
   }
+  const { bien, date, heure } = result.data;
+
+  const [bienRow] = await db.select({ agentId: biensTable.agentId })
+    .from(biensTable).where(eq(biensTable.titre, bien)).limit(1);
+  if (!bienRow) {
+    res.status(404).json({ error: "Bien introuvable" });
+    return;
+  }
+  const agentId = bienRow.agentId;
+
+  // Vérifier le jour bloqué manuellement
+  const [bloque] = await db.select({ id: joursBloquesTable.id }).from(joursBloquesTable)
+    .where(and(eq(joursBloquesTable.agentId, agentId), eq(joursBloquesTable.date, date))).limit(1);
+  if (bloque) {
+    res.status(409).json({ error: "Ce jour n'est pas disponible à la réservation" });
+    return;
+  }
+
+  // Vérifier les horaires de base du jour de la semaine
+  const jourCode = JOURS_ORDRE[new Date(date + "T12:00:00Z").getUTCDay()]!;
+  const [horaireRow] = await db.select().from(horairesTable)
+    .where(and(eq(horairesTable.agentId, agentId), eq(horairesTable.jour, jourCode))).limit(1);
+  const horaire = horaireRow ?? { actif: DEFAULTS_JOUR[jourCode]!.actif, heureDebut: DEFAULTS_JOUR[jourCode]!.heureDebut, heureFin: DEFAULTS_JOUR[jourCode]!.heureFin };
+
+  if (!horaire.actif) {
+    res.status(409).json({ error: "Aucune visite possible ce jour-là" });
+    return;
+  }
+  if (heure < horaire.heureDebut || heure >= horaire.heureFin) {
+    res.status(409).json({ error: `Créneau hors horaires (disponible de ${horaire.heureDebut} à ${horaire.heureFin})` });
+    return;
+  }
+
   const id = crypto.randomUUID();
   const [reservation] = await db
     .insert(reservationsTable)
@@ -51,7 +87,6 @@ router.post("/reservations", async (req, res) => {
 });
 
 // ─── Créneaux déjà pris pour les biens de l'agent (auth requise) ──────────────
-// IMPORTANT : cette route doit rester déclarée AVANT "/reservations/:id"
 router.get("/reservations/creneaux-pris", requireAuth, async (req: AuthRequest, res) => {
   const { bienId } = req.query;
   const conditions: SQL[] = [eq(biensTable.agentId, req.agentId!)];
