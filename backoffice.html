@@ -4442,7 +4442,7 @@ if(hasVisite) {
       }
     }
     html += `<div style="margin-top:10px;display:flex;gap:8px;">
-      <button onclick="dispoBlocked.add('${key}');renderDispoCal();openDispoDay(${d},'${key}','${dayName}',true,${hasVisite},${isOff},${JSON.stringify(horaire)})" class="btn btn-ghost" style="flex:1;font-size:0.78rem;">🔒 Bloquer cette journée</button>
+<button onclick="sauvegarderJourBloque('${key}');renderDispoCal();openDispoDay(${d},'${key}','${dayName}',true,${hasVisite},${isOff},${JSON.stringify(horaire)})" class="btn btn-ghost" style="flex:1;font-size:0.78rem;">🔒 Bloquer cette journée</button>
     </div>`;
   }
 
