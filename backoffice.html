@@ -4281,6 +4281,7 @@ function toggleHoraire(id) {
   row.classList.toggle('disabled', !h.on);
   day.className = 'horaire-day ' + (h.on?'on':'off');
   tog.classList.toggle('off', !h.on);
+  renderDispoCal();
 }
 
 function updateHoraire(id, field, val) {
