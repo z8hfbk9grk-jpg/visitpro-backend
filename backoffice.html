@@ -5853,6 +5853,7 @@ document.querySelectorAll('.bien-card').forEach(card => {
 // ── CONFIG API ──────────────────────────────────────────────
 const API = 'https://visitpro-backend-2.onrender.com';
 const MOIS_FR = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
+  let disposReelles = {};
 
 function getToken() { return localStorage.getItem('visitpro_token'); }
 function getAgent() { try { return JSON.parse(localStorage.getItem('visitpro_agent')); } catch(e) { return null; } }
@@ -5875,7 +5876,24 @@ async function doLogout() {
   document.getElementById('login-password').value = '';
 }
 
-// ── LOGIN ───────────────────────────────────────────────────
+async function chargerDisponibilitesDepuisAPI() {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${API}/api/reservations/creneaux-pris`, { headers: { 'Authorization': 'Bearer ' + token } });
+    const data = await res.json();
+    disposReelles = data.creneaux || {};
+    dispoVisites.clear();
+    Object.keys(disposReelles).forEach(dateStr => {
+      const [y,m,d] = dateStr.split('-').map(Number);
+      dispoVisites.add(`${y}-${m-1}-${d}`);
+    });
+    renderDispoCal();
+  } catch(e) {
+    console.warn('Erreur chargement disponibilités:', e);
+  }
+}
+  // ── LOGIN ───────────────────────────────────────────────────
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
@@ -5958,6 +5976,7 @@ async function initDashboard(agent) {
     // Charger les vrais biens (remplace les cartes de démo)
     chargerBiensDepuisAPI();
     chargerClientsDepuisAPI();
+    chargerDisponibilitesDepuisAPI();
 
   } catch(e) {
     console.warn('Erreur chargement dashboard:', e);
