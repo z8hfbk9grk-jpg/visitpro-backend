@@ -6,6 +6,7 @@ import biensRouter from "./biens";
 import authRouter from "./auth";
 import statsRouter from "./stats";
 import clientsRouter from "./clients";
+import disponibilitesRouter from "./disponibilites";
 
 const router: IRouter = Router();
 router.use(healthRouter);
@@ -15,4 +16,5 @@ router.use(reservationsRouter);
 router.use(biensRouter);
 router.use(statsRouter);
 router.use(clientsRouter);
+router.use(disponibilitesRouter);
 export default router;
