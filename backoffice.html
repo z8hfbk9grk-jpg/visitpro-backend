@@ -3326,21 +3326,12 @@ body {
     <div class="topbar">
       <div>
         <div class="page-title">Clients</div>
-        <div class="page-subtitle">9 clients · 7 actifs ce mois</div>
+        <div class="page-subtitle" id="clients-subtitle">Chargement...</div>
       </div>
       <div class="topbar-actions">
         <input type="text" placeholder="🔍  Rechercher..." id="client-search" oninput="filterClients(this.value)"
           style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:9px 14px;font-family:'Syne',sans-serif;font-size:0.82rem;color:var(--text);outline:none;width:200px;">
-        <button class="btn btn-ghost">Exporter CSV</button>
       </div>
-    </div>
-
-    <!-- FILTRES -->
-    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
-      <button class="filter-btn active" onclick="filterClientStatus('tous',this)">Tous <span style="opacity:0.6;font-size:0.8em;">9</span></button>
-      <button class="filter-btn" onclick="filterClientStatus('offre',this)">Avec offre <span style="opacity:0.6;font-size:0.8em;">2</span></button>
-      <button class="filter-btn" onclick="filterClientStatus('primo',this)">Primo-accédants <span style="opacity:0.6;font-size:0.8em;">4</span></button>
-      <button class="filter-btn" onclick="filterClientStatus('invest',this)">Investisseurs <span style="opacity:0.6;font-size:0.8em;">3</span></button>
     </div>
 
     <div class="clients-layout" id="clients-layout">
