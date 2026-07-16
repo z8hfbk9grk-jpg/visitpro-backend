@@ -6139,6 +6139,7 @@ async function initDashboard(agent) {
 
     // Charger les vrais biens (remplace les cartes de démo)
     chargerBiensDepuisAPI();
+    chargerClientsDepuisAPI();
 
   } catch(e) {
     console.warn('Erreur chargement dashboard:', e);
