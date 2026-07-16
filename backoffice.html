@@ -4110,270 +4110,115 @@ function sendTest() {
 }
 
 // ── CLIENTS ──────────────────────────────────────────────
-const clientsData = [
-  {
-    initiales:'MD', couleur:'linear-gradient(135deg,#8A6B30,#D4A853)',
-    nom:'Marie Dupont', email:'marie.dupont@email.com', tel:'06 12 34 56 78',
-    adresse:'14 Rue de la Paix, 75002 Paris',
-    profil:'Primo-accédante', budget:'600 000 – 680 000 €',
-    recherche:'Depuis 2 mois', financement:'Accord de principe obtenu',
-    statut:'Offre en cours', statutCol:'gold', profil_type:'primo', score:92,
-    notes:'Très motivée, disponible rapidement. Cherche Paris intra-muros, min 3P, lumineux.',
-    visites:[
-      {date:'2 juin', bien:'Appt Haussmannien 4P · Paris 11e', heure:'15h30', résultat:'Offre déposée : 630 000 €'},
-      {date:'18 mai', bien:'T3 lumineux · Montreuil', heure:'11h00', résultat:'Non retenu — trop excentré'},
-    ],
-    recos:[
-      {img:'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=100&q=70', nom:'T3 Bastille rénové', detail:'Paris 11e · 71 m²', prix:'590 000 €', match:'94%'},
-      {img:'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=100&q=70', nom:'Appt 3P République', detail:'Paris 10e · 68 m²', prix:'620 000 €', match:'88%'},
-    ]
-  },
-  {
-    initiales:'AK', couleur:'linear-gradient(135deg,#3D5A7A,#5A9BE0)',
-    nom:'Ahmed Khelifi', email:'a.khelifi@email.com', tel:'07 22 33 44 55',
-    adresse:'8 Avenue de la République, 75011 Paris',
-    profil:'Investisseur', budget:'500 000 – 650 000 €',
-    recherche:'Depuis 4 mois', financement:'Fonds propres',
-    statut:'Négociation', statutCol:'blue', profil_type:'invest', score:78,
-    notes:'Cherche bon rendement locatif. Préfère Paris 10/11e. Pas de jardin requis.',
-    visites:[
-      {date:'5 juin', bien:'Loft industriel 3P · Paris 10e', heure:'11h00', résultat:'Offre déposée : 615 000 €'},
-      {date:'22 mai', bien:'Studio Paris 18e', heure:'14h00', résultat:'Surface trop petite'},
-    ],
-    recos:[
-      {img:'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=100&q=70', nom:'Appt Haussmannien 4P', detail:'Paris 11e · 87 m²', prix:'645 000 €', match:'81%'},
-      {img:'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=100&q=70', nom:'Loft 3P République', detail:'Paris 10e · 65 m²', prix:'510 000 €', match:'76%'},
-    ]
-  },
-  {
-    initiales:'TB', couleur:'linear-gradient(135deg,#5A3D7A,#9B5AE0)',
-    nom:'Thomas Bernard', email:'t.bernard@email.com', tel:'07 89 01 23 45',
-    adresse:'3 Rue des Acacias, 94300 Vincennes',
-    profil:'Propriétaire revendeur', budget:'800 000 – 950 000 €',
-    recherche:'Depuis 1 mois', financement:'Revente en cours',
-    statut:'Visite confirmée', statutCol:'green', profil_type:'primo', score:65,
-    notes:'Famille avec 2 enfants. Jardin obligatoire, proche écoles, min 5P.',
-    visites:[
-      {date:'3 juin', bien:'Maison 5P Vincennes', heure:'10h00', résultat:'À venir'},
-    ],
-    recos:[
-      {img:'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=100&q=70', nom:'Maison 5P avec jardin', detail:'Vincennes · 140 m²', prix:'890 000 €', match:'96%'},
-      {img:'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=100&q=70', nom:'Pavillon 4P Nogent', detail:'Nogent-sur-Marne · 110 m²', prix:'720 000 €', match:'79%'},
-    ]
-  },
-  {
-    initiales:'LM', couleur:'linear-gradient(135deg,#3D7A5A,#4CAF7D)',
-    nom:'Lucie Martin', email:'lucie.martin@email.com', tel:'06 55 44 33 22',
-    adresse:'22 Rue Lepic, 75018 Paris',
-    profil:'Investisseuse locative', budget:'150 000 – 250 000 €',
-    recherche:'Depuis 3 semaines', financement:'Prêt en cours',
-    statut:'En attente', statutCol:'', profil_type:'invest', score:55,
-    notes:'Cherche studio ou T1 pour investissement locatif. Paris uniquement.',
-    visites:[
-      {date:'3 juin', bien:'Studio Paris 18e', heure:'14h30', résultat:'À venir'},
-    ],
-    recos:[
-      {img:'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=100&q=70', nom:'Studio 25m² lumineux', detail:'Paris 18e · 25 m²', prix:'195 000 €', match:'91%'},
-      {img:'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=100&q=70', nom:'Studio Paris 10e', detail:'Paris 10e · 22 m²', prix:'178 000 €', match:'85%'},
-    ]
-  },
-  {
-    initiales:'NL', couleur:'linear-gradient(135deg,#7A5A3D,#C9873A)',
-    nom:'Nathalie Leroy', email:'n.leroy@email.com', tel:'06 88 77 66 55',
-    adresse:'5 Rue du Commerce, 75015 Paris',
-    profil:'Primo-accédante', budget:'550 000 – 700 000 €',
-    recherche:'Depuis 5 mois', financement:'En attente banque',
-    statut:'En recherche', statutCol:'', profil_type:'primo', score:60,
-    notes:'Très sélective, cherche depuis longtemps. Haussmannien, Paris Est, min 3P.',
-    visites:[
-      {date:'10 juin', bien:'Appt Haussmannien 4P · Paris 11e', heure:'09h30', résultat:'À venir'},
-      {date:'12 mai', bien:'Maison 5P Vincennes', heure:'14h00', résultat:'Non retenu — jardin trop petit'},
-      {date:'3 avril', bien:'Loft industriel 3P · Paris 10e', heure:'10h00', résultat:'Non retenu — style pas adapté'},
-    ],
-    recos:[
-      {img:'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=100&q=70', nom:'Appt Haussmannien 4P', detail:'Paris 11e · 87 m²', prix:'645 000 €', match:'89%'},
-      {img:'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=100&q=70', nom:'T3 Bastille rénové', detail:'Paris 11e · 71 m²', prix:'590 000 €', match:'82%'},
-    ]
-  },
-  {
-    initiales:'FM', couleur:'linear-gradient(135deg,#5A3D3D,#E05A5A)',
-    nom:'François Morel', email:'f.morel@email.com', tel:'07 11 22 33 44',
-    adresse:'18 Allée des Roses, 94130 Nogent-sur-Marne',
-    profil:'Primo-accédant', budget:'600 000 – 800 000 €',
-    recherche:'Depuis 6 semaines', financement:'Accord de principe',
-    statut:'En recherche', statutCol:'', profil_type:'primo', score:70,
-    notes:'Couple avec enfant. Veut jardin, proche RER A, min 4P.',
-    visites:[
-      {date:'12 juin', bien:'Pavillon 4P · Nogent-sur-Marne', heure:'10h00', résultat:'À venir'},
-    ],
-    recos:[
-      {img:'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=100&q=70', nom:'Pavillon 4P Nogent', detail:'Nogent-sur-Marne · 110 m²', prix:'720 000 €', match:'95%'},
-      {img:'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=100&q=70', nom:'Maison 5P Vincennes', detail:'Vincennes · 140 m²', prix:'890 000 €', match:'72%'},
-    ]
-  },
-  {
-    initiales:'SC', couleur:'linear-gradient(135deg,#2A5C4A,#3DAA80)',
-    nom:'Sophie Carlier', email:'s.carlier@email.com', tel:'06 44 22 11 99',
-    adresse:'32 Boulevard Voltaire, 75011 Paris',
-    profil:'Investisseuse SCI', budget:'900 000 – 1 200 000 €',
-    recherche:'Depuis 2 semaines', financement:'SCI familiale — fonds disponibles',
-    statut:'Très actif', statutCol:'green', profil_type:'invest', score:88,
-    notes:'Cherche immeuble de rapport ou grand appartement divisible. Paris intra-muros. Décision rapide.',
-    visites:[
-      {date:'8 juin', bien:'Loft industriel 3P · Paris 10e', heure:'09h00', résultat:'Très intéressée'},
-      {date:'6 juin', bien:'Appt Haussmannien 4P · Paris 11e', heure:'14h00', résultat:'Trop petit pour le projet'},
-    ],
-    recos:[
-      {img:'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=100&q=70', nom:'Loft industriel 3P', detail:'Paris 10e · 72 m²', prix:'520 000 €', match:'87%'},
-      {img:'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=100&q=70', nom:'Grand T4 divisible', detail:'Paris 11e · 110 m²', prix:'980 000 €', match:'82%'},
-    ]
-  },
-  {
-    initiales:'RD', couleur:'linear-gradient(135deg,#3A3A6A,#6A6ABA)',
-    nom:'Rémi Ducasse', email:'r.ducasse@email.com', tel:'07 66 55 44 33',
-    adresse:'7 Rue des Martyrs, 75009 Paris',
-    profil:'Primo-accédant', budget:'280 000 – 350 000 €',
-    recherche:'Depuis 3 mois', financement:'PTZ + prêt conventionnel',
-    statut:'En recherche', statutCol:'', profil_type:'primo', score:45,
-    notes:'Jeune actif, seul. Cherche T2 ou grand studio. Banlieue acceptée si bien desservie.',
-    visites:[
-      {date:'15 mai', bien:'Studio Paris 18e', heure:'10h00', résultat:'Surface trop petite'},
-      {date:'2 mai', bien:'T3 lumineux · Montreuil', heure:'15h00', résultat:'Hors budget'},
-    ],
-    recos:[
-      {img:'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=100&q=70', nom:'Studio 25m² lumineux', detail:'Paris 18e · 25 m²', prix:'195 000 €', match:'78%'},
-      {img:'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=100&q=70', nom:'T2 Montreuil rénové', detail:'Montreuil · 38 m²', prix:'310 000 €', match:'72%'},
-    ]
-  },
-  {
-    initiales:'IP', couleur:'linear-gradient(135deg,#6A2A2A,#BA4A4A)',
-    nom:'Isabelle Petit', email:'i.petit@email.com', tel:'06 33 77 88 99',
-    adresse:'14 Rue de la Liberté, 93100 Montreuil',
-    profil:'Propriétaire', budget:'350 000 – 450 000 €',
-    recherche:'Depuis 7 semaines', financement:'Revente appartement',
-    statut:'Annulé', statutCol:'red', profil_type:'primo', score:30,
-    notes:'A annulé sa dernière visite. À relancer — cherche T3 proche métro, rez-de-chaussée accepté.',
-    visites:[
-      {date:'7 juin', bien:'T3 lumineux · Montreuil', heure:'16h00', résultat:'Annulé par le client'},
-      {date:'20 avril', bien:'Studio Paris 18e', heure:'11h00', résultat:'Non adapté'},
-    ],
-    recos:[
-      {img:'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=100&q=70', nom:'T3 Montreuil lumineux', detail:'Montreuil · 65 m²', prix:'380 000 €', match:'84%'},
-      {img:'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=100&q=70', nom:'Appt 3P Vincennes', detail:'Vincennes · 58 m²', prix:'420 000 €', match:'71%'},
-    ]
-  },
-];
-
+// ── CLIENTS (dérivés des réservations, via l'API) ────────────
 let ficheOpen = false;
+let clientsCache = [];
 
-function renderClientsList() {
-  const list = document.getElementById('clients-list');
-  list.innerHTML = clientsData.map((c, i) => {
-    const tagBg = { gold:'rgba(212,168,83,0.15)', blue:'rgba(90,155,224,0.12)', green:'rgba(76,175,125,0.1)', red:'rgba(224,90,90,0.1)', '':`var(--surface2)` }[c.statutCol] || 'var(--surface2)';
-    const tagColor = { gold:'var(--gold)', blue:'var(--blue)', green:'var(--green)', red:'var(--red)', '':'var(--soft)' }[c.statutCol] || 'var(--soft)';
-    return `<div class="client-row-compact" id="crow-${i}" data-profil="${c.profil_type}" data-has-offre="${c.statutCol==='gold'||c.statutCol==='blue'?'1':'0'}" onclick="openClient(${i})">
-      <div class="crc-avatar" style="background:${c.couleur}">${c.initiales}</div>
-      <div class="crc-name">${c.nom}</div>
-      <div class="crc-tag" style="background:${tagBg};color:${tagColor}">${c.statut}</div>
-      <div class="crc-arrow">›</div>
-    </div>`;
-  }).join('');
+const CLIENT_COLORS = [
+  'linear-gradient(135deg,#8A6B30,#D4A853)',
+  'linear-gradient(135deg,#3D5A7A,#5A9BE0)',
+  'linear-gradient(135deg,#5A3D7A,#9B5AE0)',
+  'linear-gradient(135deg,#3D7A5A,#4CAF7D)',
+  'linear-gradient(135deg,#7A5A3D,#C9873A)',
+  'linear-gradient(135deg,#5A3D3D,#E05A5A)',
+];
+function couleurFromEmail(email) {
+  let hash = 0;
+  for (let i = 0; i < email.length; i++) hash = email.charCodeAt(i) + ((hash << 5) - hash);
+  return CLIENT_COLORS[Math.abs(hash) % CLIENT_COLORS.length];
+}
+function initialesClient(prenom, nom) {
+  return ((prenom?.[0] || '') + (nom?.[0] || '')).toUpperCase();
 }
 
-function openClient(idx) {
-  const c = clientsData[idx];
-  ficheOpen = true;
+async function chargerClientsDepuisAPI(q) {
+  const list = document.getElementById('clients-list');
+  if (!list) return;
+  const token = getToken();
+  if (!token) return;
+  try {
+    const url = new URL(`${API}/api/clients`);
+    if (q) url.searchParams.set('q', q);
+    const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+    const data = await res.json();
+    clientsCache = data.data || [];
 
-  document.querySelectorAll('.client-row-compact').forEach((r,i) => r.classList.toggle('selected', i===idx));
+    list.innerHTML = '';
+    if (!clientsCache.length) {
+      list.innerHTML = `<div style="padding:24px;text-align:center;color:var(--muted);font-size:0.85rem;">Aucun client pour l'instant. Les clients apparaissent ici dès qu'une réservation est effectuée.</div>`;
+    } else {
+      clientsCache.forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'client-row-compact';
+        row.onclick = () => openClient(c.email);
+        row.innerHTML = `
+          <div class="crc-avatar" style="background:${couleurFromEmail(c.email)}">${initialesClient(c.prenom, c.nom)}</div>
+          <div class="crc-name">${c.prenom} ${c.nom}</div>
+          <div class="crc-tag" style="background:var(--surface2);color:var(--soft);">${c.nombreVisites} visite${c.nombreVisites > 1 ? 's' : ''}</div>
+          <div class="crc-arrow">›</div>`;
+        list.appendChild(row);
+      });
+    }
+    const subtitle = document.getElementById('clients-subtitle');
+    if (subtitle) subtitle.textContent = `${clientsCache.length} client${clientsCache.length > 1 ? 's' : ''}`;
+  } catch(e) {
+    console.warn('Erreur chargement clients:', e);
+  }
+}
+
+async function openClient(email) {
+  ficheOpen = true;
+  document.querySelectorAll('.client-row-compact').forEach(r => r.classList.remove('selected'));
   document.getElementById('clients-layout').classList.add('fiche-open');
   document.getElementById('clients-middle').innerHTML = '';
 
-  const col = c.statutCol;
-  const tagBg    = { gold:'rgba(212,168,83,0.15)', blue:'rgba(90,155,224,0.12)', green:'rgba(76,175,125,0.1)', red:'rgba(224,90,90,0.1)' }[col] || 'var(--surface2)';
-  const tagColor = { gold:'var(--gold)', blue:'var(--blue)', green:'var(--green)', red:'var(--red)' }[col] || 'var(--soft)';
-
   const panel = document.getElementById('client-fiche-panel');
   panel.style.display = 'block';
-  panel.innerHTML = `
-  <div class="client-fiche">
+  panel.innerHTML = `<div class="client-fiche"><div style="padding:40px;text-align:center;color:var(--muted);">Chargement...</div></div>`;
 
-    <!-- HEADER STICKY -->
-    <div class="fiche-client-header">
-      <div class="fiche-client-avatar" style="background:${c.couleur}">${c.initiales}</div>
-      <div style="flex:1;">
-        <div class="fiche-client-name">${c.nom}</div>
-        <div class="fiche-client-score">
-          <span style="font-size:0.7rem;color:var(--muted);">Intérêt</span>
-          <div class="score-bar"><div class="score-fill" style="width:${c.score}%"></div></div>
-          <span style="font-size:0.78rem;color:var(--gold);font-weight:700;">${c.score}%</span>
+  const token = getToken();
+  try {
+    const res = await fetch(`${API}/api/clients/${encodeURIComponent(email)}`, { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) throw new Error('Client introuvable');
+    const c = await res.json();
+
+    panel.innerHTML = `
+    <div class="client-fiche">
+      <div class="fiche-client-header">
+        <div class="fiche-client-avatar" style="background:${couleurFromEmail(c.email)}">${initialesClient(c.prenom, c.nom)}</div>
+        <div style="flex:1;">
+          <div class="fiche-client-name">${c.prenom} ${c.nom}</div>
+          <div style="font-size:0.78rem;color:var(--muted);margin-top:4px;">${c.nombreVisites} visite${c.nombreVisites > 1 ? 's' : ''} au total</div>
         </div>
+        <button class="fiche-close-btn" onclick="closeClient()">✕</button>
       </div>
-      <span class="crc-tag" style="background:${tagBg};color:${tagColor};margin-right:10px;">${c.statut}</span>
-      <button class="fiche-close-btn" onclick="closeClient()">✕</button>
-    </div>
 
-    <!-- COORDONNÉES -->
-    <div class="fiche-section">
-      <div class="fiche-section-label">Coordonnées</div>
-      <div class="info-row"><span class="label">📧 Email</span><span class="val">${c.email}</span></div>
-      <div class="info-row"><span class="label">📱 Téléphone</span><span class="val">${c.tel}</span></div>
-      <div class="info-row"><span class="label">📍 Adresse</span><span class="val">${c.adresse}</span></div>
-    </div>
+      <div class="fiche-section">
+        <div class="fiche-section-label">Coordonnées</div>
+        <div class="info-row"><span class="label">📧 Email</span><span class="val">${c.email}</span></div>
+        <div class="info-row"><span class="label">📱 Téléphone</span><span class="val">${c.telephone}</span></div>
+      </div>
 
-    <!-- PROFIL -->
-    <div class="fiche-section">
-      <div class="fiche-section-label">Profil acheteur</div>
-      <div class="info-row"><span class="label">Type</span><span class="val">${c.profil}</span></div>
-      <div class="info-row"><span class="label">Budget</span><span class="val" style="color:var(--gold);font-weight:700;">${c.budget}</span></div>
-      <div class="info-row"><span class="label">En recherche</span><span class="val">${c.recherche}</span></div>
-      <div class="info-row"><span class="label">Financement</span><span class="val">${c.financement}</span></div>
-    </div>
+      <div class="fiche-section">
+        <div class="fiche-section-label">Historique des visites (${c.historique.length})</div>
+        ${c.historique.map(v => `
+          <div class="visite-mini">
+            <div class="visite-mini-date">${v.date}</div>
+            <div class="visite-mini-info">
+              <div class="visite-mini-bien">${v.bien}</div>
+              <div class="visite-mini-sub">${v.heure}</div>
+            </div>
+          </div>`).join('')}
+      </div>
 
-    <!-- NOTES -->
-    <div class="fiche-section">
-      <div class="fiche-section-label">Notes</div>
-      <div class="fiche-notes">📝 ${c.notes}</div>
-    </div>
-
-    <!-- VISITES -->
-    <div class="fiche-section">
-      <div class="fiche-section-label">Visites effectuées (${c.visites.length})</div>
-      ${c.visites.map(v => `
-        <div class="visite-mini">
-          <div class="visite-mini-date">${v.date}</div>
-          <div class="visite-mini-info">
-            <div class="visite-mini-bien">${v.bien}</div>
-            <div class="visite-mini-sub">${v.heure} · ${v.résultat}</div>
-          </div>
-        </div>`).join('')}
-    </div>
-
-    <!-- RECOMMANDATIONS -->
-    <div class="fiche-section">
-      <div class="fiche-section-label">✦ Biens recommandés</div>
-      <div style="font-size:0.76rem;color:var(--muted);margin-bottom:12px;">Basé sur le profil et les visites passées</div>
-      ${c.recos.map(r => `
-        <div class="reco-card">
-          <img class="reco-thumb" src="${r.img}" alt="">
-          <div class="reco-info">
-            <div class="reco-name">${r.nom}</div>
-            <div class="reco-detail">${r.detail}</div>
-          </div>
-          <div style="text-align:right;">
-            <div class="reco-price">${r.prix}</div>
-            <div class="reco-match">${r.match}</div>
-          </div>
-        </div>`).join('')}
-    </div>
-
-    <!-- ACTIONS STICKY EN BAS -->
-    <div class="fiche-actions-bar">
-      <button class="btn btn-ghost" style="flex:1;">📱 Appeler</button>
-      <button class="btn btn-ghost" style="flex:1;">📧 Email</button>
-      <button class="btn btn-gold" style="flex:1;">📅 Planifier visite</button>
-    </div>
-
-  </div>`;
+      <div class="fiche-actions-bar">
+        <button class="btn btn-ghost" style="flex:1;" onclick="window.location.href='tel:${c.telephone}'">📱 Appeler</button>
+        <button class="btn btn-ghost" style="flex:1;" onclick="window.location.href='mailto:${c.email}'">📧 Email</button>
+      </div>
+    </div>`;
+  } catch(e) {
+    panel.innerHTML = `<div class="client-fiche"><div style="padding:40px;text-align:center;color:var(--red);">Erreur : ${e.message}</div></div>`;
+  }
 }
 
 function closeClient() {
@@ -4385,25 +4230,7 @@ function closeClient() {
 }
 
 function filterClients(val) {
-  const q = val.toLowerCase();
-  document.querySelectorAll('.client-row-compact').forEach(row => {
-    const name = row.querySelector('.crc-name').textContent.toLowerCase();
-    row.style.display = name.includes(q) ? '' : 'none';
-  });
-}
-
-function filterClientStatus(status, btn) {
-  const page = document.getElementById('page-clients');
-  page.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  page.querySelectorAll('.client-row-compact').forEach(row => {
-    if(status === 'tous') { row.style.display=''; return; }
-    const p = row.dataset.profil, o = row.dataset.hasOffre;
-    const match = (status==='offre' && o==='1') ||
-                  (status==='primo' && p==='primo') ||
-                  (status==='invest' && p==='invest');
-    row.style.display = match ? '' : 'none';
-  });
+  chargerClientsDepuisAPI(val);
 }
 
 // ── DISPONIBILITÉS ───────────────────────────────────────
