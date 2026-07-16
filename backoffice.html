@@ -4386,11 +4386,22 @@ function openDispoDay(d, key, dayName, isBlocked, hasVisite, isOff, horaire) {
         <div style="flex:1;color:var(--green);font-weight:600;">Disponible jusqu'à ${horaire.end}</div>
       </div>`;
     }
-    if(hasVisite) {
-      html += `<div class="dispo-slot slot-visite">
-        <span class="dispo-slot-time">📅</span>
-        <div style="flex:1;"><div style="font-weight:600;">Visite planifiée</div><div style="font-size:0.74rem;color:var(--muted);">Créneau bloqué automatiquement</div></div>
-      </div>`;
+if(hasVisite) {
+      const isoDate = `${dispoCalYear}-${String(dispoCalMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const creneaux = disposReelles[isoDate] || [];
+      if (creneaux.length) {
+        creneaux.forEach(c => {
+          html += `<div class="dispo-slot slot-visite">
+            <span class="dispo-slot-time">${c.heure}</span>
+            <div style="flex:1;"><div style="font-weight:600;">${c.bien}</div><div style="font-size:0.74rem;color:var(--muted);">Créneau bloqué automatiquement</div></div>
+          </div>`;
+        });
+      } else {
+        html += `<div class="dispo-slot slot-visite">
+          <span class="dispo-slot-time">📅</span>
+          <div style="flex:1;"><div style="font-weight:600;">Visite planifiée</div><div style="font-size:0.74rem;color:var(--muted);">Créneau bloqué automatiquement</div></div>
+        </div>`;
+      }
     }
     html += `<div style="margin-top:10px;display:flex;gap:8px;">
       <button onclick="dispoBlocked.add('${key}');renderDispoCal();openDispoDay(${d},'${key}','${dayName}',true,${hasVisite},${isOff},${JSON.stringify(horaire)})" class="btn btn-ghost" style="flex:1;font-size:0.78rem;">🔒 Bloquer cette journée</button>
