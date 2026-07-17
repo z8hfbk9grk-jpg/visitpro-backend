@@ -5067,7 +5067,18 @@ function calNext() {
 let currentView = 'month';
 // offset en jours depuis le lundi de la semaine courante
 let selectedWeekStart = 0; // 0 = semaine de juin 2025 semaine 1
-let selectedDayView = 2; // 2 juin par défaut
+let selectedDayView = _todayVisites.getDate();
+let selectedDayViewMonth = _todayVisites.getMonth();
+let selectedDayViewYear = _todayVisites.getFullYear();
+
+function changeDayView(delta) {
+  const d = new Date(selectedDayViewYear, selectedDayViewMonth, selectedDayView);
+  d.setDate(d.getDate() + delta);
+  selectedDayViewYear = d.getFullYear();
+  selectedDayViewMonth = d.getMonth();
+  selectedDayView = d.getDate();
+  renderDayView();
+}
 
 function setCalView(v, btn) {
   currentView = v;
