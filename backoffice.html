@@ -5087,7 +5087,10 @@ const HOUR_START = 8;
 
 function getWeekDays(weekOffset) {
   // Lundi de la semaine de référence = lundi 2 juin 2025
-  const base = new Date(2025, 5, 2);
+const base = new Date(_todayVisites);
+  const jsDay = base.getDay();
+  const diffToMonday = jsDay === 0 ? -6 : 1 - jsDay;
+  base.setDate(base.getDate() + diffToMonday);
   base.setDate(base.getDate() + weekOffset);
   const days = [];
   for(let i = 0; i < 7; i++) {
