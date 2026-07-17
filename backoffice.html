@@ -4851,27 +4851,92 @@ function showToast(msg) {
 const MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const DAYS_FR = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
 
-let calYear = 2025, calMonth = 5; // juin 2025 (0-indexed)
-let selectedDay = 3; // jour sélectionné par défaut
+const _todayVisites = new Date();
+let calYear = _todayVisites.getFullYear(), calMonth = _todayVisites.getMonth();
+let selectedDay = _todayVisites.getDate();
 
-// Visites existantes (jour -> liste)
-const visites = {
-  '2025-5-2':  [{ heure:'15h30', bien:'Appt Haussmannien 4P', client:'Marie Dupont', tel:'06 12 34 56 78', duree:'45 min', profil:'Primo-accédante', email:'marie.dupont@email.com', adresse:'18 Rue du Faubourg Saint-Antoine, Paris 11e' }],
-  '2025-5-3':  [
-    { heure:'10h00', bien:'Maison 5P Vincennes', client:'Thomas Bernard', tel:'07 89 01 23 45', duree:'1h', profil:'Propriétaire', email:'t.bernard@email.com', adresse:'12 Allée des Chênes, Vincennes' },
-    { heure:'14h30', bien:'Studio Paris 18e', client:'Lucie Martin', tel:'06 55 44 33 22', duree:'45 min', profil:'Investisseuse', email:'lucie.martin@email.com', adresse:'4 Rue Lepic, Paris 18e' }
-  ],
-  '2025-5-5':  [{ heure:'11h00', bien:'Loft industriel 3P', client:'Ahmed Khelifi', tel:'07 22 33 44 55', duree:'45 min', profil:'Investisseur', email:'a.khelifi@email.com', adresse:'8 Rue du Faubourg Saint-Denis, Paris 10e' }],
-  '2025-5-10': [{ heure:'09h30', bien:'Appt Haussmannien 4P', client:'Nathalie Leroy', tel:'06 88 77 66 55', duree:'45 min', profil:'En recherche active', email:'n.leroy@email.com', adresse:'18 Rue du Faubourg Saint-Antoine, Paris 11e' }],
-  '2025-5-12': [
-    { heure:'10h00', bien:'Pavillon Nogent', client:'François Morel', tel:'07 11 22 33 44', duree:'1h', profil:'Primo-accédant', email:'f.morel@email.com', adresse:'3 Rue des Lilas, Nogent-sur-Marne' },
-    { heure:'14h00', bien:'Maison 5P Vincennes', client:'Claire Dubois', tel:'06 44 55 66 77', duree:'1h', profil:'Propriétaire', email:'c.dubois@email.com', adresse:'12 Allée des Chênes, Vincennes' }
-  ],
-  '2025-5-18': [{ heure:'16h00', bien:'Studio Paris 18e', client:'Karim Bensalem', tel:'06 33 22 11 00', duree:'30 min', profil:'Investisseur', email:'k.bensalem@email.com', adresse:'4 Rue Lepic, Paris 18e' }],
-};
+// Visites réelles (chargées depuis l'API — voir chargerVisitesDepuisAPI)
+let visites = {};
 
-// Jours bloqués
-const blockedDays = new Set(['2025-5-7', '2025-5-8', '2025-5-21', '2025-5-22', '2025-5-28', '2025-5-29']);
+// Jours bloqués réels (chargés depuis l'API)
+let blockedDays = new Set();
+
+async function chargerVisitesDepuisAPI() {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const [reservRes, bloquesRes] = await Promise.all([
+      fetch(`${API}/api/reservations?limite=200`, { headers: { 'Authorization': 'Bearer ' + token } }),
+      fetch(`${API}/api/disponibilites/jours-bloques`, { headers: { 'Authorization': 'Bearer ' + token } })
+    ]);
+    const reservData = await reservRes.json();
+    const bloquesData = await bloquesRes.json();
+
+    visites = {};
+    (reservData.data || []).forEach(r => {
+      const d = new Date(r.date + 'T12:00:00');
+      const key = dayKey(d.getFullYear(), d.getMonth(), d.getDate());
+      if (!visites[key]) visites[key] = [];
+      visites[key].push({
+        heure: r.heure ? r.heure.replace(':','h') : '—',
+        bien: r.bien,
+        client: `${r.prenom} ${r.nom}`,
+        tel: r.telephone,
+        duree: '45 min',
+        profil: '',
+        email: r.email,
+        adresse: '—',
+      });
+    });
+
+    blockedDays = new Set();
+    (bloquesData.data || []).forEach(b => {
+      const [y,m,d] = b.date.split('-').map(Number);
+      blockedDays.add(dayKey(y, m-1, d));
+    });
+
+    if (currentView === 'month') renderCal();
+    else if (currentView === 'week') renderWeek();
+    else if (currentView === 'day') renderDayView();
+
+    if (selectedDay) {
+      const key = dayKey(calYear, calMonth, selectedDay);
+      selectDay(selectedDay, key, visites[key] || [], blockedDays.has(key));
+    }
+
+    const subtitle = document.getElementById('visites-subtitle');
+    if (subtitle) {
+      const total = (reservData.data || []).length;
+      subtitle.textContent = `${MONTHS[calMonth]} ${calYear} · ${total} visite${total>1?'s':''} planifiée${total>1?'s':''}`;
+    }
+
+    renderNotifsVisites(reservData.data || []);
+  } catch(e) {
+    console.warn('Erreur chargement visites:', e);
+  }
+}
+
+function renderNotifsVisites(reservations) {
+  const list = document.getElementById('notif-list');
+  const badge = document.getElementById('notif-badge');
+  if (!list) return;
+  const recentes = reservations.slice(0, 5);
+  if (!recentes.length) {
+    list.innerHTML = `<div style="padding:20px;text-align:center;color:var(--muted);font-size:0.82rem;">Aucune activité récente.</div>`;
+    if (badge) badge.textContent = '0';
+    return;
+  }
+  list.innerHTML = recentes.map((r, i) => `
+    <div class="cal-notif${i < 2 ? ' new' : ''}">
+      <div class="cal-notif-dot${i < 2 ? '' : ' read'}"></div>
+      <div>
+        <div style="font-size:0.82rem;"><strong>${r.prenom} ${r.nom}</strong> a réservé</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">${r.bien} · ${r.date} à ${r.heure}</div>
+      </div>
+      <div style="font-size:0.7rem;color:var(--muted);white-space:nowrap;">${new Date(r.createdAt).toLocaleDateString('fr-FR', {day:'numeric',month:'short'})}</div>
+    </div>`).join('');
+  if (badge) badge.textContent = String(Math.min(recentes.length, 2));
+}
 
 function dayKey(y, m, d) { return `${y}-${m}-${d}`; }
 
