@@ -4000,6 +4000,9 @@ function setPage(name, navEl) {
   }
   // Resynchroniser le compteur de biens à chaque changement de page
   try { syncBiensCount(); } catch(e) {}
+  if (name === 'visites') {
+    try { chargerVisitesDepuisAPI(); } catch(e) {}
+  }
 }
 
 // SMS TEMPLATES
