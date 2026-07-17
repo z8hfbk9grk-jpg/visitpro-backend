@@ -5056,12 +5056,12 @@ function changeMonth(dir) {
 function calPrev() {
   if(currentView === 'month') changeMonth(-1);
   else if(currentView === 'week') { selectedWeekStart -= 7; renderWeek(); }
-  else if(currentView === 'day') { selectedDayView -= 1; renderDayView(); }
+else if(currentView === 'day') { changeDayView(-1); }
 }
 function calNext() {
   if(currentView === 'month') changeMonth(1);
   else if(currentView === 'week') { selectedWeekStart += 7; renderWeek(); }
-  else if(currentView === 'day') { selectedDayView += 1; renderDayView(); }
+else if(currentView === 'day') { changeDayView(1); }
 }
 
 let currentView = 'month';
