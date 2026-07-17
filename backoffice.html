@@ -5221,8 +5221,8 @@ const d = new Date(selectedDayViewYear, selectedDayViewMonth, selectedDayView);
       <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">${isBlocked ? '🔒 Journée bloquée' : dayVisites.length + ' visite(s) planifiée(s)'}</div>
     </div>
     <div class="day-view-nav">
-      <button class="cal-nav-btn" onclick="selectedDayView--;renderDayView()">‹</button>
-      <button class="cal-nav-btn" onclick="selectedDayView++;renderDayView()">›</button>
+<button class="cal-nav-btn" onclick="changeDayView(-1)">‹</button>
+      <button class="cal-nav-btn" onclick="changeDayView(1)">›</button>
     </div>`;
 
   document.getElementById('cal-month-title').textContent =
