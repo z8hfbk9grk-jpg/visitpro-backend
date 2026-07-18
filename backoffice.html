@@ -5686,6 +5686,15 @@ async function chargerBiensDepuisAPI() {
     }
     const subtitle = document.getElementById('biens-subtitle');
     if (subtitle) subtitle.textContent = `${biens.length} bien${biens.length > 1 ? 's' : ''}`;
+
+    const cTous = document.getElementById('count-tous');
+    if (cTous) cTous.textContent = biens.length;
+    const cActif = document.getElementById('count-actif');
+    if (cActif) cActif.textContent = biens.length;
+    const cOffre = document.getElementById('count-offre');
+    if (cOffre) cOffre.textContent = 0;
+    const cVendu = document.getElementById('count-vendu');
+    if (cVendu) cVendu.textContent = 0;
   } catch(e) {
     console.warn('Erreur chargement biens:', e);
   }
