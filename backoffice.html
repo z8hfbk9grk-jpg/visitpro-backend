@@ -3068,10 +3068,10 @@ body {
 
     <!-- FILTRES -->
     <div style="display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;">
-      <button class="filter-btn active" onclick="filterBiens('tous',this)">Tous <span style="opacity:0.6;font-size:0.8em;">34</span></button>
-      <button class="filter-btn" onclick="filterBiens('actif',this)">Actifs <span style="opacity:0.6;font-size:0.8em;">28</span></button>
-      <button class="filter-btn" onclick="filterBiens('offre',this)">Sous offre <span style="opacity:0.6;font-size:0.8em;">4</span></button>
-      <button class="filter-btn" onclick="filterBiens('vendu',this)">Vendus <span style="opacity:0.6;font-size:0.8em;">2</span></button>
+<button class="filter-btn active" onclick="filterBiens('tous',this)">Tous <span style="opacity:0.6;font-size:0.8em;" id="count-tous">0</span></button>
+      <button class="filter-btn" onclick="filterBiens('actif',this)">Actifs <span style="opacity:0.6;font-size:0.8em;" id="count-actif">0</span></button>
+      <button class="filter-btn" onclick="filterBiens('offre',this)">Sous offre <span style="opacity:0.6;font-size:0.8em;" id="count-offre">0</span></button>
+      <button class="filter-btn" onclick="filterBiens('vendu',this)">Vendus <span style="opacity:0.6;font-size:0.8em;" id="count-vendu">0</span></button>
       <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
         <input type="text" placeholder="🔍  Rechercher un bien..." style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:9px 14px;font-family:'Syne',sans-serif;font-size:0.82rem;color:var(--text);outline:none;width:240px;" oninput="searchBiens(this.value)">
       </div>
