@@ -5475,7 +5475,7 @@ document.addEventListener('DOMContentLoaded', () => {
   } catch(e) { console.warn('selectDay', e); }
 
   // Clients
-  try { renderClientsList(); } catch(e) { console.warn('renderClientsList', e); }
+// Clients (chargés uniquement quand on va sur la page - voir setPage)
 
   // Disponibilités
   try { renderHoraires(); } catch(e) { console.warn('renderHoraires', e); }
