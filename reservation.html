@@ -794,7 +794,7 @@
         telephone: tel,
         bien: bienActuel ? bienActuel.titre : 'Appartement Haussmannien 4P',
         bienId: propertyId || null,
-        date: selectedDate ? selectedDate.toISOString().split('T')[0] : (selectedCreneau ? selectedCreneau.dateLabel : ''),
+        date: selectedDate ? formatLocalDate(selectedDate) : (selectedCreneau ? selectedCreneau.dateLabel : ''),
         heure: selectedCreneau ? selectedCreneau.heure : ''
       })
     });
@@ -883,7 +883,12 @@
 
   // ── CALENDRIER DYNAMIQUE ─────────────────────
   const MONTHS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-
+function formatLocalDate(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
   const today = new Date();
   let resaYear  = today.getFullYear();
   let resaMonth = today.getMonth();
