@@ -2637,59 +2637,13 @@ body {
       <div class="right-col">
 
         <!-- BIENS LES + VISITÉS -->
-        <div class="card">
+<div class="card">
           <div class="card-header">
             <div class="card-title">Biens populaires</div>
             <a class="card-action" onclick="setPage('biens', null)">Gérer →</a>
           </div>
-
-          <div class="bien-item">
-            <div class="bien-thumb">
-              <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=100&q=70" alt="">
-            </div>
-            <div class="bien-item-info">
-              <div class="bien-item-name">Appt Haussmannien 4P</div>
-              <div class="bien-item-addr">Paris 11e · 645 000 €</div>
-            </div>
-            <div class="bien-item-right">
-              <div class="bien-item-status"></div>
-              <div class="bien-item-visits">8 visites</div>
-            </div>
-          </div>
-
-          <div class="bien-item">
-            <div class="bien-thumb">
-              <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=100&q=70" alt="">
-            </div>
-            <div class="bien-item-info">
-              <div class="bien-item-name">Maison 5P avec jardin</div>
-              <div class="bien-item-addr">Vincennes · 890 000 €</div>
-            </div>
-            <div class="bien-item-right">
-              <div class="bien-item-status"></div>
-              <div class="bien-item-visits">6 visites</div>
-            </div>
-          </div>
-
-          <div class="bien-item">
-            <div class="bien-thumb">
-              <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=100&q=70" alt="">
-            </div>
-            <div class="bien-item-info">
-              <div class="bien-item-name">Loft industriel 3P</div>
-              <div class="bien-item-addr">Paris 10e · 520 000 €</div>
-            </div>
-            <div class="bien-item-right">
-              <div class="bien-item-status"></div>
-              <div class="bien-item-visits">5 visites</div>
-            </div>
-          </div>
-
-          <!-- LIEN À COPIER -->
-          <div style="padding: 12px 20px 4px; font-size:0.7rem; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase;">Lien à coller sur Leboncoin</div>
-          <div class="link-copy-box">
-            <div class="link-copy-text">visitpro.io/visite/martineau/appt-haussmannien-4p</div>
-            <button class="copy-btn" onclick="this.textContent='✓ Copié!';setTimeout(()=>this.textContent='Copier',1500)">Copier</button>
+          <div id="biens-populaires-list">
+            <div style="padding:24px;text-align:center;color:var(--muted);font-size:0.85rem;">Chargement...</div>
           </div>
         </div>
 
