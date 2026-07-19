@@ -2939,6 +2939,57 @@ body {
       </div>
     </div>
 
+    <!-- MODAL : NOUVELLE VISITE -->
+    <div id="new-visite-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;align-items:center;justify-content:center;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px;width:480px;max-width:92vw;">
+        <div style="font-family:'Fraunces',serif;font-size:1.3rem;margin-bottom:4px;">+ Nouvelle visite</div>
+        <div style="font-size:0.8rem;color:var(--muted);margin-bottom:20px;">Créez une réservation manuellement (ex : client au téléphone).</div>
+
+        <div id="nv-error" style="display:none;background:rgba(224,90,90,0.1);border:1px solid rgba(224,90,90,0.3);border-radius:7px;padding:10px 14px;font-size:0.8rem;color:var(--red);margin-bottom:16px;"></div>
+
+        <div style="margin-bottom:14px;">
+          <label class="settings-label">Bien concerné</label>
+          <select id="nv-bien" class="settings-select" style="width:100%;"></select>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+          <div>
+            <label class="settings-label">Date</label>
+            <input type="date" id="nv-date" class="settings-input" style="color-scheme:dark;">
+          </div>
+          <div>
+            <label class="settings-label">Heure</label>
+            <input type="time" id="nv-heure" class="settings-input" style="color-scheme:dark;">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+          <div>
+            <label class="settings-label">Prénom client</label>
+            <input type="text" id="nv-prenom" class="settings-input" placeholder="Marie">
+          </div>
+          <div>
+            <label class="settings-label">Nom client</label>
+            <input type="text" id="nv-nom" class="settings-input" placeholder="Dupont">
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label class="settings-label">Email</label>
+          <input type="email" id="nv-email" class="settings-input" placeholder="marie.dupont@email.com">
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label class="settings-label">Téléphone</label>
+          <input type="tel" id="nv-tel" class="settings-input" placeholder="06 12 34 56 78">
+        </div>
+
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-ghost" style="flex:1;" onclick="closeNewVisiteModal()">Annuler</button>
+          <button class="btn btn-gold" style="flex:1;" id="nv-submit-btn" onclick="confirmNewVisite()">Créer la visite</button>
+        </div>
+      </div>
+    </div>
     <!-- MODAL : DÉTAIL VISITE -->
     <div id="visite-detail-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;align-items:center;justify-content:center;">
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px;width:460px;max-width:92vw;">
