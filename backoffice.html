@@ -5453,7 +5453,77 @@ function annulerVisite() {
   closeVisiteDetail();
   addNotif('Visite annulée', 'La visite a été supprimée du calendrier', false);
 }
-function openNewVisiteModal() {}
+async function openNewVisiteModal() {
+  const modal = document.getElementById('new-visite-modal');
+  const select = document.getElementById('nv-bien');
+  select.innerHTML = '<option>Chargement...</option>';
+  modal.style.display = 'flex';
+
+  const agent = getAgent();
+  try {
+    const res = await fetch(`${API}/api/biens?agentId=${agent.id}&limite=100`);
+    const data = await res.json();
+    const biens = data.data || [];
+    select.innerHTML = biens.map(b => `<option value="${b.id}" data-titre="${b.titre}">${b.titre}</option>`).join('');
+  } catch(e) {
+    select.innerHTML = '<option>Erreur de chargement</option>';
+  }
+}
+
+function closeNewVisiteModal() {
+  document.getElementById('new-visite-modal').style.display = 'none';
+  document.getElementById('nv-error').style.display = 'none';
+  ['nv-date','nv-heure','nv-prenom','nv-nom','nv-email','nv-tel'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+}
+
+async function confirmNewVisite() {
+  const errDiv = document.getElementById('nv-error');
+  errDiv.style.display = 'none';
+
+  const bienSelect = document.getElementById('nv-bien');
+  const bienId = bienSelect.value;
+  const bienTitre = bienSelect.options[bienSelect.selectedIndex]?.dataset.titre || '';
+  const date = document.getElementById('nv-date').value;
+  const heure = document.getElementById('nv-heure').value;
+  const prenom = document.getElementById('nv-prenom').value.trim();
+  const nom = document.getElementById('nv-nom').value.trim();
+  const email = document.getElementById('nv-email').value.trim();
+  const tel = document.getElementById('nv-tel').value.trim();
+
+  if (!bienId || !date || !heure || !prenom || !nom || !email || !tel) {
+    errDiv.textContent = 'Merci de remplir tous les champs.';
+    errDiv.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('nv-submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Création...';
+
+  try {
+    const token = getToken();
+    const res = await fetch(`${API}/api/reservations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ nom, prenom, email, telephone: tel, bien: bienTitre, bienId, date, heure })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erreur lors de la création');
+
+    closeNewVisiteModal();
+    showToast('✓ Visite créée pour ' + prenom + ' ' + nom);
+    chargerVisitesDepuisAPI();
+  } catch(e) {
+    errDiv.textContent = e.message || 'Erreur lors de la création.';
+    errDiv.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Créer la visite';
+  }
+}
 function openVisites(bien) {}
 
 // NOTIFICATIONS
