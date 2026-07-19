@@ -4542,20 +4542,15 @@ const PLANS = {
 let compte = {
   plan: 'trial',
   biensActifs: 0,      // calculé dynamiquement depuis les cartes
-  smsUtilises: 12,
+ smsUtilises: 0,
   trialjour: 7,
   optionBiens: 0,
 };
 
+let vraiNombreBiens = 0;
+
 function countBiensActifs() {
-  // Compter les vraies cartes biens avec statut "actif" ou "offre"
-  const cards = document.querySelectorAll('.bien-card');
-  let count = 0;
-  cards.forEach(c => {
-    const status = c.dataset.status;
-    if(status === 'actif' || status === 'offre') count++;
-  });
-  return count;
+  return vraiNombreBiens;
 }
 
 function syncBiensCount() {
@@ -4691,13 +4686,7 @@ function checkSmsLimit() {
 }
 
 function countBiensActifs() {
-  const cards = document.querySelectorAll('.bien-card');
-  let count = 0;
-  cards.forEach(c => {
-    const status = c.dataset.status;
-    if(status === 'actif' || status === 'offre') count++;
-  });
-  return count;
+  return vraiNombreBiens;
 }
 
 function syncBiensCount() {
@@ -5756,6 +5745,8 @@ async function chargerBiensDepuisAPI() {
     const data = await res.json();
     const biens = data.data || [];
     renderBiensPopulaires(biens);
+    vraiNombreBiens = biens.length;
+    syncBiensCount();
 
     grid.innerHTML = '';
     if (!biens.length) {
