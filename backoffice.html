@@ -5634,6 +5634,7 @@ async function chargerBiensDepuisAPI() {
     const res = await fetch(`${API}/api/biens?agentId=${agent.id}&limite=100`);
     const data = await res.json();
     const biens = data.data || [];
+    renderBiensPopulaires(biens);
 
     grid.innerHTML = '';
     if (!biens.length) {
@@ -5655,6 +5656,27 @@ async function chargerBiensDepuisAPI() {
   } catch(e) {
     console.warn('Erreur chargement biens:', e);
   }
+}
+  function renderBiensPopulaires(biens) {
+  const list = document.getElementById('biens-populaires-list');
+  if (!list) return;
+  if (!biens.length) {
+    list.innerHTML = `<div style="padding:24px;text-align:center;color:var(--muted);font-size:0.85rem;">Aucun bien pour l'instant.</div>`;
+    return;
+  }
+  list.innerHTML = biens.slice(0, 3).map(bien => `
+    <div class="bien-item" onclick="setPage('biens', null)" style="cursor:pointer;">
+      <div class="bien-thumb">
+        <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=100&q=70" alt="">
+      </div>
+      <div class="bien-item-info">
+        <div class="bien-item-name">${bien.titre}</div>
+        <div class="bien-item-addr">${bien.adresse} · ${Number(bien.prix).toLocaleString('fr-FR')} €</div>
+      </div>
+      <div class="bien-item-right">
+        <div class="bien-item-status"></div>
+      </div>
+    </div>`).join('');
 }
 
 // FICHE BIEN
