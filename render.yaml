@@ -14,3 +14,68 @@ services:
         value: "8080"
       - key: DATABASE_URL
         sync: false
+
+  # ------------------------------------------------------------------
+  # Agent de prospection Airbnb (dossier prospection-agent/)
+  # ------------------------------------------------------------------
+
+  # Page web : coller les annonces, voir les prospects, lien de désinscription
+  - type: web
+    name: prospection-agent
+    runtime: node
+    region: frankfurt
+    plan: free
+    rootDir: prospection-agent
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /sante
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: EMAIL_TO
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: CONCIERGERIE_NOM
+        sync: false
+      - key: CONCIERGERIE_SIGNATURE
+        sync: false
+      - key: CONCIERGERIE_PITCH
+        sync: false
+
+  # Tâche planifiée : chaque matin, analyse + email récapitulatif
+  # "0 5 * * *" = 5h UTC = 6h (hiver) ou 7h (été) heure de Paris
+  - type: cron
+    name: prospection-agent-matin
+    runtime: node
+    region: frankfurt
+    plan: starter
+    rootDir: prospection-agent
+    schedule: "0 5 * * *"
+    buildCommand: npm ci && npm run build
+    startCommand: npm run cron
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: EMAIL_TO
+        sync: false
+      - key: PUBLIC_URL
+        sync: false
+      - key: CONCIERGERIE_NOM
+        sync: false
+      - key: CONCIERGERIE_SIGNATURE
+        sync: false
+      - key: CONCIERGERIE_PITCH
+        sync: false
